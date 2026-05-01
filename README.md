@@ -8,3 +8,4 @@ features:
 3. you can set your budget by category, if u go over the budget then it will let u know and lower it for other's - so you don't go over
 4. wishlist - icon that will appear on home screen, it fills us you get closer to your goal - can be widget as well
 5. a tree like thing - that is on your home scrwen 
+hi
