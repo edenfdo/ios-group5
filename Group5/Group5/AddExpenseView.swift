@@ -99,7 +99,7 @@ struct AddExpenseView: View {
         if let decimalIndex = money.firstIndex(of: "."){
             let afterDecimal = money[money.index(after: decimalIndex)...]
             if afterDecimal.count > 2 {
-                let allowedPart = money.index(decimalIndex, offsetBy: 2)
+                let allowedPart = money.index(decimalIndex, offsetBy: 3)
                 money = String(money[..<allowedPart])
             }
         }
