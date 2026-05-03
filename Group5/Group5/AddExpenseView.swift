@@ -15,6 +15,7 @@ struct AddExpenseView: View {
     @State private var expenseText: String = ""
     @State private var selectedCategory: ExpenseCategory? = nil
     @State private var noteText: String = ""
+    @ObservedObject var viewModel: ExpenseViewModel
     
     let maxExpenseAmount: Double = 999999999999.99
     let maxNoteLength: Int = 200
@@ -65,7 +66,7 @@ struct AddExpenseView: View {
             
             HStack {
                 Text("$")
-                    .font(.system(size: 36))
+                    .font(.title2)
                     .bold()
                 
                 TextField("Enter amount", text: $expenseText)
@@ -78,9 +79,8 @@ struct AddExpenseView: View {
                     }
                     
             } .padding(.horizontal, 20)
-        }
-        .padding(.vertical, 5)
-        .padding(.horizontal, 15)
+        }.padding(.vertical, 5)
+            .padding(.horizontal, 15)
         
     }
     
@@ -157,7 +157,19 @@ struct AddExpenseView: View {
     
     var saveButton: some View { //need to save to somewhere
         Button {
-            
+            if let category = selectedCategory {
+                let newItem = ExpenseItem(
+                    spending: expenseValue,
+                    category: category,
+                    note: noteText,
+                    date: selectedDate
+                )
+                viewModel.expenses.append(newItem)
+                
+                expenseText = ""
+                selectedCategory = nil
+                noteText = ""
+            }
         } label: {
             Text("Save")
                 .font(.title2)
@@ -168,7 +180,6 @@ struct AddExpenseView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 30))
         }.padding()
     }
-    
 
 }
 
@@ -201,5 +212,5 @@ struct CategoryButton: View{
 }
 
 #Preview {
-    AddExpenseView()
+    AddExpenseView(viewModel: ExpenseViewModel())
 }
