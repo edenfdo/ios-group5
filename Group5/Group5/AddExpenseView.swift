@@ -44,12 +44,13 @@ struct AddExpenseView: View {
                     saveButton
                     
                 }
-                .padding(.bottom, 60)
-                .padding(.top, 15)
+                .padding(.bottom, 10)
+                .padding(.top, 60)
             }
         }
     }
     
+    //select the date when was this expense spend
     var dateSelection: some View {
         VStack(alignment: .leading){
             HStack {
@@ -61,6 +62,7 @@ struct AddExpenseView: View {
         }.padding()
     }
     
+    //expense textfield
     var expenseAmount: some View {
         VStack(alignment: .leading){
             Text("How much you spend for this?")
@@ -81,8 +83,9 @@ struct AddExpenseView: View {
                     }
                     
             } .padding(.horizontal, 20)
-        }.padding(.vertical, 5)
-            .padding(.horizontal, 15)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 15)
         
     }
     
@@ -116,6 +119,7 @@ struct AddExpenseView: View {
         
     }
     
+    //category icons view
     var categorySelection: some View {
         LazyVGrid(
         columns: Array(repeating: GridItem(.flexible()), count: 4)
@@ -132,6 +136,7 @@ struct AddExpenseView: View {
         .padding(.horizontal, 15)
     }
     
+    //note writing view
     var noteSection: some View {
         VStack(alignment: .leading) {
             Text("Note (optional)")
@@ -146,10 +151,12 @@ struct AddExpenseView: View {
                     .onChange(of: noteText) { oldValue, newValue in
                         limitNoteInput(newValue)
                     }
-            }.padding(.horizontal, 20)
+                    .frame(height: 65)
+            }
+            .padding(.horizontal, 20)
         }
         .padding(.horizontal, 15)
-        .padding(.top, 15)
+        .padding(.top, 20)
     }
     
     //limit note length
@@ -159,6 +166,7 @@ struct AddExpenseView: View {
         }
     }
     
+    //saveButton view
     var saveButton: some View { //need to save to somewhere
         Button {
             if let category = selectedCategory {
