@@ -69,7 +69,7 @@ struct TabBar: View {
                     .fontWeight(selectedTab == tab ? .bold : .regular)
                     
             }
-            .foregroundStyle(selectedTab == tab ? .tabBarG : .gray)
+            .foregroundStyle(selectedTab == tab ? .chart : .gray)
         }
     }
 
