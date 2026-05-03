@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 import SwiftUI
 
 // Stores custom colours that can be used throughout the application
@@ -15,3 +16,4 @@ enum AppColours {
     static let black = Color.black
     static let white = Color.white
 }
+
