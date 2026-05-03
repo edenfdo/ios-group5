@@ -21,7 +21,7 @@ struct ContentView: View {
     
     var body: some View {
         
-        Text("$\(viewModel.todayTotal, specifier: "%.2f")")
+        
         
         ZStack(alignment: .bottom) {
             Rectangle()
@@ -30,7 +30,7 @@ struct ContentView: View {
             VStack {
                 switch selectedTab {
                 case .home:
-                    ContentView(viewModel: viewModel)
+                    HomeView(viewModel: viewModel)
                 case .addExpense:
                     AddExpenseView(viewModel: viewModel)
                 case .budget:
