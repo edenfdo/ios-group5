@@ -30,21 +30,23 @@ struct AddExpenseView: View {
     
     var body: some View {
         ZStack {
-            VStack(spacing: 10) {
-                
-                dateSelection
-                
-                expenseAmount
-                
-                categorySelection
-                
-                noteSection
-                
-                saveButton
-                
+            ScrollView {
+                VStack(spacing: 10) {
+                    
+                    dateSelection
+                    
+                    expenseAmount
+                    
+                    categorySelection
+                    
+                    noteSection
+                    
+                    saveButton
+                    
+                }
+                .padding(.bottom, 60)
+                .padding(.top, 15)
             }
-            .padding(.bottom, 60)
-            .padding(.top, 15)
         }
     }
     
@@ -108,7 +110,10 @@ struct AddExpenseView: View {
             money = String(maxExpenseAmount)
         }
         
-        expenseText = money
+        if money != expenseText {
+                expenseText = money
+            }
+        
     }
     
     var categorySelection: some View {
@@ -138,7 +143,6 @@ struct AddExpenseView: View {
                     .font(Font.system(size: 18))
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .lineLimit(1...3)
-                    .frame(height: 60)
                     .onChange(of: noteText) { oldValue, newValue in
                         limitNoteInput(newValue)
                     }
