@@ -15,7 +15,7 @@ struct ExpenseItem: Identifiable, Codable {
     var date: Date
     
     init(id: UUID = UUID(), spending: Double, category: ExpenseCategory, note: String? = nil, date: Date = Date()){
-        self.id = id
+        self.id = UUID()
         self.spending = spending
         self.category = category
         self.note = note

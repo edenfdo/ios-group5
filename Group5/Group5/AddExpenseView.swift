@@ -17,6 +17,9 @@ struct AddExpenseView: View {
     @State private var noteText: String = ""
     @ObservedObject var viewModel: ExpenseViewModel
     
+    let maxExpenseAmount: Double = 999999999999.99
+    let maxNoteLength: Int = 200
+    
     var expenseValue: Double {
         Double(expenseText) ?? 0
     }
@@ -27,7 +30,7 @@ struct AddExpenseView: View {
     
     var body: some View {
         ZStack {
-            VStack {
+            VStack(spacing: 10) {
                 
                 dateSelection
                 
@@ -40,6 +43,8 @@ struct AddExpenseView: View {
                 saveButton
                 
             }
+            .padding(.bottom, 60)
+            .padding(.top, 15)
         }
     }
     
@@ -65,11 +70,45 @@ struct AddExpenseView: View {
                     .bold()
                 
                 TextField("Enter amount", text: $expenseText)
+                    .font(Font.system(size: 28))
                     .keyboardType(.decimalPad)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.vertical, 8)
+                    .onChange(of: expenseText) { oldValue, newValue in
+                        limitedExpenseInput(newValue)
+                    }
                     
             } .padding(.horizontal, 20)
-        }.padding()
+        }.padding(.vertical, 5)
+            .padding(.horizontal, 15)
+        
+    }
+    
+    //limit money amount
+    func limitedExpenseInput(_ newValue: String) {
+        var money = ""
+        
+        for character in newValue {
+            if character.isNumber {
+                money.append(character)
+            } else if character == "."{
+                money.append(character)
+            }
+        }
+        
+        if let decimalIndex = money.firstIndex(of: "."){
+            let afterDecimal = money[money.index(after: decimalIndex)...]
+            if afterDecimal.count > 2 {
+                let allowedPart = money.index(decimalIndex, offsetBy: 2)
+                money = String(money[..<allowedPart])
+            }
+        }
+        
+        if let amount = Double(money), amount > maxExpenseAmount {
+            money = String(maxExpenseAmount)
+        }
+        
+        expenseText = money
     }
     
     var categorySelection: some View {
@@ -95,10 +134,25 @@ struct AddExpenseView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .bold()
-                TextField("What was this for?", text: $noteText)
+                TextField("What was this for?", text: $noteText, axis: .vertical)
+                    .font(Font.system(size: 18))
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .lineLimit(1...3)
+                    .frame(height: 60)
+                    .onChange(of: noteText) { oldValue, newValue in
+                        limitNoteInput(newValue)
+                    }
             }.padding(.horizontal, 20)
-        }.padding()
+        }
+        .padding(.horizontal, 15)
+        .padding(.top, 15)
+    }
+    
+    //limit note length
+    func limitNoteInput(_ newValue: String) {
+        if newValue.count > maxNoteLength {
+            noteText = String(newValue.prefix(maxNoteLength))
+        }
     }
     
     var saveButton: some View { //need to save to somewhere
@@ -126,8 +180,6 @@ struct AddExpenseView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 30))
         }.padding()
     }
-    
-    
 
 }
 
