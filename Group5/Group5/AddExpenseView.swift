@@ -17,7 +17,7 @@ struct AddExpenseView: View {
     @State private var noteText: String = ""
     @ObservedObject var viewModel: ExpenseViewModel
     
-    let maxExpenseAmount: Double = 999999999999.99
+    let maxExpenseAmount: Double = 99999999999999.99
     let maxNoteLength: Int = 200
     
     var expenseValue: Double {
