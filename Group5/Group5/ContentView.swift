@@ -7,17 +7,43 @@
 
 import SwiftUI
 
+enum AppTab {
+    case home
+    case addExpense
+    case budget
+    case analytics
+}
+
 struct ContentView: View {
+//    @StateObject private var addExpenseView =
+    @State private var selectedTab: AppTab = .home
+    @StateObject var viewModel = ExpenseViewModel()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hi this is assignment 3 grp 5")
-            Text("Hello")
-            Text("Test again")
+        
+        
+        
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .fill(.backgroundColour)
+                .ignoresSafeArea()
+            VStack {
+                switch selectedTab {
+                case .home:
+                    HomeView(viewModel: viewModel)
+                case .addExpense:
+                    AddExpenseView(viewModel: viewModel)
+                case .budget:
+                    BudgetView()
+                case .analytics:
+                    AnalyticsView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            TabBar(selectedTab: $selectedTab)
         }
-        .padding()
+        .ignoresSafeArea()
     }
 }
 
