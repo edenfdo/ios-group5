@@ -26,6 +26,7 @@ Add Expense Page:
 Budget Page: 
 1. User could press the "Set Monthly Budget" button with a pop-up page to set their monthly budget and category budget.
 2. Will show the monthly budget and category budget limit with bars visualising percentage.
+3. User could choose which category to add budget, if they didn't add any limit for a category, then no limit for this category.
 
 Analytics Page:
 1. This page should show the total spend of this year and how many expenses the user spent.
