@@ -11,6 +11,7 @@ import SwiftUI
 struct BudgetView: View {
     var body: some View {
         Text("Hello, this is budget page!")
+            .font(.title)
     }
 }
 
