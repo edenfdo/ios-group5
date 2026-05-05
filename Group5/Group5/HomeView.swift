@@ -11,20 +11,36 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var viewModel: ExpenseViewModel
     
+    @State private var displayDate = Date()
+    
     var body: some View {
         NavigationStack{
             ScrollView{
                 VStack (spacing: 20) {
                     HStack(spacing: 15) {
                         expenseCard(title: "Today", amount: viewModel.todayTotal)
-                        expenseCard(title: "Remaining", amount: 125.10) // Update this logic in VM later
+                        expenseCard(title: "Remaining", amount: viewModel.remainingMonthlyBudget)
                     }
                     .padding(.horizontal)
                     
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 150, height: 150)
-                        .overlay(Image(systemName: "car.fill").font(.system(size: 60)))
+                    Button(action: {
+                        print("Goal button tapped")
+                        // Logic to navigate or open a sheet goes here
+                    }) {
+                        Text("Create a goal")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity) // Makes it span the width
+                            .padding(.vertical, 14)      // Adjust height
+                            .background(Color(red: 255/255, green: 185/255, blue: 135/255)) // Match the orange/peach color
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal) // Adds space on the sides to match your cards
+                    
+//                    Circle()
+//                        .fill(Color.gray.opacity(0.2))
+//                        .frame(width: 150, height: 150)
+//                        .overlay(Image(systemName: "car.fill").font(.system(size: 60)))
 
                     calendarView
 //                    Text("Today's Total")
@@ -35,12 +51,13 @@ struct HomeView: View {
                 .padding(.top)
                 
             }
+            .background(.backgroundColour)
             .toolbar {
-                
                 ToolbarItem(placement: .principal) {
                     Text("SaveSync")
                         .font(.headline) // Adjust font style to match your design
-                        .foregroundColor(.primary)
+                        
+                       
                 }
             }
             
@@ -54,9 +71,8 @@ struct HomeView: View {
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.black)
             
-            Text(amount, format: .currency(code: "USD"))
+            Text("$\(amount, specifier: "%.2f")")
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.black)
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -66,14 +82,24 @@ struct HomeView: View {
     
     private var calendarView: some View {
         VStack(spacing: 15) {
-            // Month & Year Header
+            
             HStack {
-                Text("September 2025") // You can make this dynamic later
+                
+                Text(displayDate.formatted(.dateTime.month(.wide).year()))
                     .font(.system(size: 18, weight: .bold))
+                
                 Spacer()
+                
                 HStack(spacing: 20) {
-                    Image(systemName: "chevron.left")
-                    Image(systemName: "chevron.right")
+                    // back button
+                    Button(action: { moveMonth(by: -1) }) {
+                        Image(systemName: "chevron.left")
+                    }
+                    
+                    // forward button
+                    Button(action: { moveMonth(by: 1) }) {
+                        Image(systemName: "chevron.right")
+                    }
                 }
                 .font(.system(size: 14, weight: .semibold))
             }
@@ -90,26 +116,33 @@ struct HomeView: View {
                 }
             }
 
-            // The Grid of Days
-            let columns = Array(repeating: GridItem(.flexible()), count: 7)
-            let days = Date().getAllDays() // Gets dates for current month
             
+            let columns = Array(repeating: GridItem(.flexible()), count: 7)
+
+            
+            let days: [Date] = displayDate.getAllDays()
+
             LazyVGrid(columns: columns, spacing: 10) {
-                // Add blank spaces for the start of the month
                 let startOffset = Calendar.current.component(.weekday, from: days.first!) - 1
+                
                 ForEach(0..<startOffset, id: \.self) { _ in
                     Text("").frame(width: 35, height: 35)
                 }
 
                 ForEach(days, id: \.self) { date in
                     let dayNumber = Calendar.current.component(.day, from: date)
-                    let isOverBudget = viewModel.totalFor(day: date) > 50.0 // Your threshold
+                    
+                    // budget colour logic
+                    let dailyLimit = viewModel.monthlyBudget / 30
+                    let dayTotal = viewModel.totalFor(day: date)
+                    let percentage = dayTotal / dailyLimit
+                    let dayColor: Color = dayTotal == 0 ? .clear : (percentage > 1.0 ? .red.opacity(0.6) : .green.opacity(0.4))
                     
                     Text("\(dayNumber)")
                         .font(.system(size: 16, weight: .medium))
                         .frame(width: 35, height: 35)
-                        .background(isOverBudget ? Color(red: 255/255, green: 173/255, blue: 123/255) : Color.clear)
-                        .foregroundColor(isOverBudget ? .white : .primary)
+                        .background(dayColor)
+                        .foregroundColor(dayTotal > 0 ? .white : .primary)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
@@ -118,6 +151,12 @@ struct HomeView: View {
         .background(Color.white)
         .cornerRadius(20)
         .padding(.horizontal)
+    }
+
+    private func moveMonth(by value: Int) {
+        if let newDate = Calendar.current.date(byAdding: .month, value: value, to: displayDate) {
+            displayDate = newDate
+        }
     }
 
     

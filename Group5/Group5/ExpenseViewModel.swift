@@ -15,6 +15,9 @@ class ExpenseViewModel: ObservableObject {
         }
     }
     
+    // 1. Add a monthly budget property
+    @Published var monthlyBudget: Double = 3000.0 // Default value
+    
     private let saveKey = "SavedExpenses"
     
     init() {
@@ -29,6 +32,28 @@ class ExpenseViewModel: ObservableObject {
             .reduce(0) { $0 + $1.spending }
     }
     
+    // 2. Calculate total for the current month
+    var currentMonthTotal: Double {
+        let calendar = Calendar.current
+        return expenses
+            .filter { calendar.isDate($0.date, equalTo: Date(), toGranularity: .month) }
+            .reduce(0) { $0 + $1.spending }
+    }
+    
+    // 3. Calculate remaining budget
+    var remainingMonthlyBudget: Double {
+        return monthlyBudget - currentMonthTotal
+    }
+
+    // 4. Helper for Calendar colors (Total for a specific day)
+    func totalFor(day: Date) -> Double {
+        let calendar = Calendar.current
+        return expenses
+            .filter { calendar.isDate($0.date, inSameDayAs: day) }
+            .reduce(0) { $0 + $1.spending }
+    }
+
+
     // Save data using JSON encoding
     private func saveToUserDefaults() {
         if let encoded = try? JSONEncoder().encode(expenses) {
