@@ -10,7 +10,7 @@ import SwiftUI
 //Analytics View page
 struct AnalyticsView: View {
     var body: some View {
-        Text("Hello, this is analytics page!")
+        Text("Hi this is analytics page!")
     }
 }
 
