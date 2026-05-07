@@ -10,58 +10,84 @@ import SwiftUI
 //Home Page
 struct HomeView: View {
     @ObservedObject var viewModel: ExpenseViewModel
+    @State private var showingGoalFlow = false
     
     @State private var displayDate = Date()
     
     var body: some View {
-        NavigationStack{
-            ScrollView{
-                VStack (spacing: 20) {
-                    HStack(spacing: 15) {
-                        expenseCard(title: "Today", amount: viewModel.todayTotal)
-                        expenseCard(title: "Remaining", amount: viewModel.remainingMonthlyBudget)
-                    }
-                    .padding(.horizontal)
-                    
-                    Button(action: {
-                        print("Goal button tapped")
-                        // Logic to navigate or open a sheet goes here
-                    }) {
-                        Text("Create a goal")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity) // Makes it span the width
-                            .padding(.vertical, 14)      // Adjust height
-                            .background(Color(red: 255/255, green: 185/255, blue: 135/255)) // Match the orange/peach color
-                            .cornerRadius(12)
-                    }
-                    .padding(.horizontal) // Adds space on the sides to match your cards
-                    
-//                    Circle()
-//                        .fill(Color.gray.opacity(0.2))
-//                        .frame(width: 150, height: 150)
-//                        .overlay(Image(systemName: "car.fill").font(.system(size: 60)))
+        ZStack{
+            NavigationStack{
+                ScrollView{
+                    VStack (spacing: 20) {
+                        HStack(spacing: 15) {
+                            expenseCard(title: "Today", amount: viewModel.todayTotal)
+                            expenseCard(title: "Remaining", amount: viewModel.remainingMonthlyBudget)
+                        }
+                        .padding(.horizontal)
+                        
+                        Button(action: {
+//                            print("Goal button tapped")
+                            showingGoalFlow = true
+                            // Logic to navigate or open a sheet goes here
+                        }) {
+                            Text("Create a goal")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity) // Makes it span the width
+                                .padding(.vertical, 14)      // Adjust height
+                                .background(Color(red: 255/255, green: 185/255, blue: 135/255)) // Match the orange/peach color
+                                .cornerRadius(12)
+                        }
+//                        .sheet(isPresented: $showingGoalFlow) {
+//                            CreateGoalFlow()
+//                                .presentationDetents([.medium, .large]) // Allows it to be a popup
+//                        }
+                        .padding(.horizontal) // Adds space on the sides to match your cards
+                        
+    //                    Circle()
+    //                        .fill(Color.gray.opacity(0.2))
+    //                        .frame(width: 150, height: 150)
+    //                        .overlay(Image(systemName: "car.fill").font(.system(size: 60)))
 
-                    calendarView
-//                    Text("Today's Total")
-//                    Text("$\(viewModel.todayTotal, specifier: "%.2f")")
-//                        .font(.largeTitle)
-//                        .fontWeight(.bold)
+                        calendarView
+    //                    Text("Today's Total")
+    //                    Text("$\(viewModel.todayTotal, specifier: "%.2f")")
+    //                        .font(.largeTitle)
+    //                        .fontWeight(.bold)
+                    }
+                    .padding(.top)
+                    
                 }
-                .padding(.top)
+                .background(.backgroundColour)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("SaveSync")
+                            .font(.headline) // Adjust font style to match your design
+                            
+                           
+                    }
+                }
                 
             }
-            .background(.backgroundColour)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("SaveSync")
-                        .font(.headline) // Adjust font style to match your design
-                        
-                       
-                }
+            if showingGoalFlow {
+                // Dimmed background
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation { showingGoalFlow = false }
+                    }
+
+                // The Popup Box
+                GoalView(isPresented: $showingGoalFlow)
+                    .frame(width: 340, height: 450) // Fixed size for the box
+                    .background(Color.white)
+                    .cornerRadius(25)
+                    .shadow(radius: 20)
+                    .transition(.scale.combined(with: .opacity)) // Nice pop-in effect
             }
-            
         }
+        
+        
         
     }
     
@@ -136,13 +162,28 @@ struct HomeView: View {
                     let dailyLimit = viewModel.monthlyBudget / 30
                     let dayTotal = viewModel.totalFor(day: date)
                     let percentage = dayTotal / dailyLimit
-                    let dayColor: Color = dayTotal == 0 ? .clear : (percentage > 1.0 ? .red.opacity(0.6) : .green.opacity(0.4))
+//                    let dayColor: Color = dayTotal == 0 ? .clear : (percentage > 1.0 ? .red.opacity(0.6) : .green.opacity(0.4))
+                    var dayColor: Color {
+                        // 1. Define your custom color (#ffad7b)
+                        let baseColor = Color(red: 255/255, green: 173/255, blue: 123/255)
+                        
+                        // 2. Handle the "empty" case first
+                        if dayTotal == 0 { return .clear }
+                        
+                        // 3. Decide opacity based on 4 levels
+                        switch percentage {
+                        case ..<0.25: return baseColor.opacity(0.2) // Level 1: Under 25%
+                        case ..<0.50: return baseColor.opacity(0.4) // Level 2: 25% to 49%
+                        case ..<0.75: return baseColor.opacity(0.7) // Level 3: 50% to 74%
+                        default:      return baseColor.opacity(1.0) // Level 4: 75% and above
+                        }
+                    }
                     
                     Text("\(dayNumber)")
                         .font(.system(size: 16, weight: .medium))
                         .frame(width: 35, height: 35)
                         .background(dayColor)
-                        .foregroundColor(dayTotal > 0 ? .white : .primary)
+                        .foregroundColor(.black)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
