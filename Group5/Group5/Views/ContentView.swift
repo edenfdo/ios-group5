@@ -18,11 +18,9 @@ struct ContentView: View {
 //    @StateObject private var addExpenseView =
     @State private var selectedTab: AppTab = .home
     @StateObject var viewModel = ExpenseViewModel()
+    @StateObject var budgetViewModel = BudgetViewModel()
     
-    var body: some View {
-        
-        
-        
+    var body: some View {        
         ZStack(alignment: .bottom) {
             Rectangle()
                 .fill(.backgroundColour)
@@ -34,7 +32,7 @@ struct ContentView: View {
                 case .addExpense:
                     AddExpenseView(viewModel: viewModel)
                 case .budget:
-                    BudgetView()
+                    BudgetView(viewModel: budgetViewModel, expenseViewModel: viewModel)
                 case .analytics:
                     AnalyticsView()
                 }
