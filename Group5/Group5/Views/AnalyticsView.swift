@@ -30,8 +30,11 @@ struct AnalyticsView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 90)
+                .padding(.top, 65)
+                .safeAreaPadding(.bottom, 90)
             }
         }
+        .padding(.bottom, 90)
     }
     
     //page title
@@ -39,8 +42,8 @@ struct AnalyticsView: View {
         Text("Analytics")
             .font(.headline)
             .fontWeight(.bold)
-            .padding(.top, 25)
-            .padding(.bottom, 12)
+//            .padding(.top, 10)
+            .padding(.bottom, 1)
     }
     
     //total spent card
