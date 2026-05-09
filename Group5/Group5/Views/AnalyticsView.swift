@@ -16,6 +16,7 @@ struct AnalyticsView: View {
     }
     
     var body: some View {
+
         ZStack {
             Color("BackgroundColour")
                 .ignoresSafeArea()
@@ -106,7 +107,7 @@ struct AnalyticsView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color.catogories.opacity(0.25))
+                    .fill(Color("Catogories").opacity(0.25))
                     .frame(width: 48, height: 48)
                 
                 Image(systemName: category.icon)
@@ -261,6 +262,7 @@ struct MonthlyLineChart: View {
                     .position(points[index])
             }
         }
+        
     }
 }
 
