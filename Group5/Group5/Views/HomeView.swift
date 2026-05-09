@@ -12,8 +12,8 @@ struct HomeView: View {
     @ObservedObject var viewModel: ExpenseViewModel
     @State private var showingGoalFlow = false
     @State private var savedGoal: GoalData? = nil
-    @State private var selectedDate: Date? = nil // Tracks which day was clicked
-    @State private var showingDayDetail = false   // Controls the popup visibility
+    @State private var selectedDate: Date? = nil
+    @State private var showingDayDetail = false
     @State private var displayDate = Date()
     
     var body: some View {
@@ -30,12 +30,12 @@ struct HomeView: View {
                         VStack {
                             if let goal = savedGoal {
                                 HStack(spacing: 20) {
-                                    // LEFT SIDE: Text
+                                    
                                     VStack(alignment: .leading, spacing: 10) {
                                         Text("Your Goal Progress:")
                                             .font(.system(size: 22, weight: .bold))
                                         
-                                        // Calculate how much is left
+                                        // calculate how much is left
                                         let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
                                         
                                         Text("$\(remaining, specifier: "%.2f") away!")
@@ -44,7 +44,7 @@ struct HomeView: View {
                                     
                                     Spacer()
                                     
-                                    // RIGHT SIDE: The Circle
+                                   
                                     GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
                                         .frame(width: 120, height: 120) // Slightly smaller to fit the row
                                 }
@@ -55,31 +55,21 @@ struct HomeView: View {
                             }
 
                         }
-//                        .sheet(isPresented: $showingGoalFlow) {
-//                            CreateGoalFlow()
-//                                .presentationDetents([.medium, .large]) // Allows it to be a popup
-//                        }
+
                         .padding(.horizontal) // Adds space on the sides to match your cards
                         
-    //                    Circle()
-    //                        .fill(Color.gray.opacity(0.2))
-    //                        .frame(width: 150, height: 150)
-    //                        .overlay(Image(systemName: "car.fill").font(.system(size: 60)))
-
                         calendarView
-    //                    Text("Today's Total")
-    //                    Text("$\(viewModel.todayTotal, specifier: "%.2f")")
-    //                        .font(.largeTitle)
-    //                        .fontWeight(.bold)
+                
                     }
                     .padding(.top)
                     
                 }
                 .background(.backgroundColour)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .principal) {
                         Text("SaveSync")
-                            .font(.headline) // Adjust font style to match your design
+                            .font(.headline)
                             
                            
                     }
@@ -87,35 +77,35 @@ struct HomeView: View {
                 
             }
             if showingGoalFlow {
-                // Dimmed background
+                
                 Color.black.opacity(0.4)
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation { showingGoalFlow = false }
                     }
 
-                // The Popup Box
+               
                 GoalView(isPresented: $showingGoalFlow)
-                    .frame(width: 340, height: 450) // Fixed size for the box
+                    .frame(width: 340, height: 450)
                     .background(Color.white)
                     .cornerRadius(25)
                     .shadow(radius: 20)
-                    .transition(.scale.combined(with: .opacity)) // Nice pop-in effect
+                    .transition(.scale.combined(with: .opacity))
             }
             
             if showingDayDetail, let date = selectedDate {
-                // Dimmed background
+                
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
                     .onTapGesture { withAnimation { showingDayDetail = false } }
                 
-                // The Popup
+                
                 DayDetailPopup(
                     date: date,
                     expenses: viewModel.expensesFor(day: date),
                     isPresented: $showingDayDetail
                 )
-                .padding(.horizontal, 40) // Increases the space on the left and right
+                .padding(.horizontal, 40)
                 .padding(.vertical, 100)
                 .transition(.scale)
             }
@@ -125,7 +115,7 @@ struct HomeView: View {
         }
         .onChange(of: showingGoalFlow) { _, isShowing in
             if !isShowing {
-                loadGoal() // Refresh goal after the popup closes
+                loadGoal()
             }
         }
         
@@ -135,7 +125,7 @@ struct HomeView: View {
     func loadGoal() {
         if let data = UserDefaults.standard.data(forKey: "SavedGoals"),
            let decoded = try? JSONDecoder().decode([GoalData].self, from: data) {
-            // Get the most recent goal
+            
             self.savedGoal = decoded.last
         }
     }
@@ -180,7 +170,7 @@ struct HomeView: View {
             }
             .padding(.horizontal, 5)
 
-            // Day Headers (Su, Mo, Tu...)
+            
             let daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
             HStack {
                 ForEach(daysOfWeek, id: \.self) { day in
@@ -211,16 +201,16 @@ struct HomeView: View {
                     let dailyLimit = viewModel.monthlyBudget / 30
                     let dayTotal = viewModel.totalFor(day: date)
                     let percentage = dayTotal / dailyLimit
-//                    let dayColor: Color = dayTotal == 0 ? .clear : (percentage > 1.0 ? .red.opacity(0.6) : .green.opacity(0.4))
+
                     var dayColor: Color {
-                        // 1. Define your custom color (#ffad7b)
+                        
                         let baseColor = Color(red: 255/255, green: 173/255, blue: 123/255)
                         
-                        // 2. Handle the "empty" case first
+                       
                         if dayTotal == 0 { return .clear }
                         print("Checking Color - Percentage: \(percentage)")
                         
-                        // 3. Decide opacity based on 4 levels
+                        
                         switch percentage {
                         case ..<0.25:
                             print("Level 1 (0.2)")

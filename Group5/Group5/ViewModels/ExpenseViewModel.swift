@@ -15,8 +15,8 @@ class ExpenseViewModel: ObservableObject {
         }
     }
     
-    // 1. Add a monthly budget property
-    @Published var monthlyBudget: Double = 100.0 // Default value
+    
+    @Published var monthlyBudget: Double = 100.0
     
     private let saveKey = "SavedExpenses"
     
@@ -24,7 +24,7 @@ class ExpenseViewModel: ObservableObject {
         loadFromUserDefaults()
     }
     
-    // Calculate the total for the "Today" tab
+    // calculate the total for the "Today" tab
     var todayTotal: Double {
         let calendar = Calendar.current
         return expenses
@@ -32,7 +32,7 @@ class ExpenseViewModel: ObservableObject {
             .reduce(0) { $0 + $1.spending }
     }
     
-    // 2. Calculate total for the current month
+    // calculate total for the current month
     var currentMonthTotal: Double {
         let calendar = Calendar.current
         return expenses
@@ -40,12 +40,12 @@ class ExpenseViewModel: ObservableObject {
             .reduce(0) { $0 + $1.spending }
     }
     
-    // 3. Calculate remaining budget
+    //calculate remaining budget
     var remainingMonthlyBudget: Double {
         return monthlyBudget - currentMonthTotal
     }
 
-    // 4. Helper for Calendar colors (Total for a specific day)
+    // helper for Calendar colors (Total for a specific day)
     func totalFor(day: Date) -> Double {
         let calendar = Calendar.current
         return expenses
@@ -58,14 +58,14 @@ class ExpenseViewModel: ObservableObject {
         return expenses.filter { calendar.isDate($0.date, inSameDayAs: day) }
     }
 
-    // Save data using JSON encoding
+    // save data using JSON encoding
     private func saveToUserDefaults() {
         if let encoded = try? JSONEncoder().encode(expenses) {
             UserDefaults.standard.set(encoded, forKey: saveKey)
         }
     }
     
-    // Load data using JSON decoding
+    // load data using JSON decoding
     private func loadFromUserDefaults() {
         if let data = UserDefaults.standard.data(forKey: saveKey),
            let decoded = try? JSONDecoder().decode([ExpenseItem].self, from: data) {
