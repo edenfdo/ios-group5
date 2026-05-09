@@ -16,7 +16,7 @@ class ExpenseViewModel: ObservableObject {
     }
     
     // 1. Add a monthly budget property
-    @Published var monthlyBudget: Double = 3000.0 // Default value
+    @Published var monthlyBudget: Double = 100.0 // Default value
     
     private let saveKey = "SavedExpenses"
     
@@ -53,6 +53,10 @@ class ExpenseViewModel: ObservableObject {
             .reduce(0) { $0 + $1.spending }
     }
 
+    func expensesFor(day: Date) -> [ExpenseItem] {
+        let calendar = Calendar.current
+        return expenses.filter { calendar.isDate($0.date, inSameDayAs: day) }
+    }
 
     // Save data using JSON encoding
     private func saveToUserDefaults() {
