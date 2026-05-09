@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//Analytics View page
+//Analytics View page.
 struct AnalyticsView: View {
     @ObservedObject var viewModel: ExpenseViewModel
     
