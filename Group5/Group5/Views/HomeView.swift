@@ -11,7 +11,9 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var viewModel: ExpenseViewModel
     @State private var showingGoalFlow = false
-    
+    @State private var savedGoal: GoalData? = nil
+    @State private var selectedDate: Date? = nil // Tracks which day was clicked
+    @State private var showingDayDetail = false   // Controls the popup visibility
     @State private var displayDate = Date()
     
     var body: some View {
@@ -25,18 +27,33 @@ struct HomeView: View {
                         }
                         .padding(.horizontal)
                         
-                        Button(action: {
-//                            print("Goal button tapped")
-                            showingGoalFlow = true
-                            // Logic to navigate or open a sheet goes here
-                        }) {
-                            Text("Create a goal")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.black)
-                                .frame(maxWidth: .infinity) // Makes it span the width
-                                .padding(.vertical, 14)      // Adjust height
-                                .background(Color(red: 255/255, green: 185/255, blue: 135/255)) // Match the orange/peach color
-                                .cornerRadius(12)
+                        VStack {
+                            if let goal = savedGoal {
+                                HStack(spacing: 20) {
+                                    // LEFT SIDE: Text
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Text("Your Goal Progress:")
+                                            .font(.system(size: 22, weight: .bold))
+                                        
+                                        // Calculate how much is left
+                                        let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
+                                        
+                                        Text("$\(remaining, specifier: "%.2f") away!")
+                                            .font(.system(size: 18, weight: .semibold))
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    // RIGHT SIDE: The Circle
+                                    GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
+                                        .frame(width: 120, height: 120) // Slightly smaller to fit the row
+                                }
+                                .padding(25)
+                                .background(Color(red: 252/255, green: 245/255, blue: 230/255)) // The cream background from your image
+                                .cornerRadius(20)
+                                .padding(.horizontal)
+                            }
+
                         }
 //                        .sheet(isPresented: $showingGoalFlow) {
 //                            CreateGoalFlow()
@@ -85,10 +102,42 @@ struct HomeView: View {
                     .shadow(radius: 20)
                     .transition(.scale.combined(with: .opacity)) // Nice pop-in effect
             }
+            
+            if showingDayDetail, let date = selectedDate {
+                // Dimmed background
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation { showingDayDetail = false } }
+                
+                // The Popup
+                DayDetailPopup(
+                    date: date,
+                    expenses: viewModel.expensesFor(day: date),
+                    isPresented: $showingDayDetail
+                )
+                .padding(.horizontal, 40) // Increases the space on the left and right
+                .padding(.vertical, 100)
+                .transition(.scale)
+            }
+        }
+        .onAppear {
+            loadGoal()
+        }
+        .onChange(of: showingGoalFlow) { _, isShowing in
+            if !isShowing {
+                loadGoal() // Refresh goal after the popup closes
+            }
         }
         
         
         
+    }
+    func loadGoal() {
+        if let data = UserDefaults.standard.data(forKey: "SavedGoals"),
+           let decoded = try? JSONDecoder().decode([GoalData].self, from: data) {
+            // Get the most recent goal
+            self.savedGoal = decoded.last
+        }
     }
     
     private func expenseCard(title: String, amount: Double) -> some View {
@@ -169,13 +218,23 @@ struct HomeView: View {
                         
                         // 2. Handle the "empty" case first
                         if dayTotal == 0 { return .clear }
+                        print("Checking Color - Percentage: \(percentage)")
                         
                         // 3. Decide opacity based on 4 levels
                         switch percentage {
-                        case ..<0.25: return baseColor.opacity(0.2) // Level 1: Under 25%
-                        case ..<0.50: return baseColor.opacity(0.4) // Level 2: 25% to 49%
-                        case ..<0.75: return baseColor.opacity(0.7) // Level 3: 50% to 74%
-                        default:      return baseColor.opacity(1.0) // Level 4: 75% and above
+                        case ..<0.25:
+                            print("Level 1 (0.2)")
+                            return baseColor.opacity(0.2) // Level 1: Under 25%
+                            
+                        case ..<0.50:
+                            print("Level 2 (0.4)")
+                            return baseColor.opacity(0.4) // Level 2: 25% to 49%
+                        case ..<0.75:
+                            print("Level 3 (0.7)")
+                            return baseColor.opacity(0.7) // Level 3: 50% to 74%
+                        default:
+                            print("Level 4 (1.0)")
+                            return baseColor.opacity(1.0) // Level 4: 75% and above
                         }
                     }
                     
@@ -185,6 +244,10 @@ struct HomeView: View {
                         .background(dayColor)
                         .foregroundColor(.black)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .onTapGesture {
+                            selectedDate = date // Set the specific date clicked
+                            withAnimation { showingDayDetail = true }
+                        }
                 }
             }
         }
