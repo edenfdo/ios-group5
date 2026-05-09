@@ -81,6 +81,7 @@ struct AddExpenseView: View {
                     .onChange(of: expenseText) { oldValue, newValue in
                         limitedExpenseInput(newValue)
                     }
+                    .frame(height: 55)
                     
             } .padding(.horizontal, 20)
         }
