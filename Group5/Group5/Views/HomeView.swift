@@ -23,11 +23,11 @@ struct HomeView: View {
             ZStack {
                 VStack {
                     Text("SaveSync")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .padding(.bottom, 10)
-                
-                
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 10)
+                    
+                    
                     ScrollView{
                         VStack (spacing: 20) {
                             HStack(spacing: 15) {
@@ -37,7 +37,7 @@ struct HomeView: View {
                             .padding(.horizontal)
                             VStack {
                                 if let goal = savedGoal {
-                                    // DISPLAY 1: Show progress if a goal exists
+                                    
                                     HStack(spacing: 20) {
                                         VStack(alignment: .leading, spacing: 10) {
                                             Text("Your Goal Progress:")
@@ -60,7 +60,7 @@ struct HomeView: View {
                                     .padding(.horizontal)
                                     
                                 } else {
-                                    // DISPLAY 2: Show the create button if no goal exists
+                                    
                                     Button(action: {
                                         showingGoalFlow = true
                                     }) {
@@ -75,11 +75,11 @@ struct HomeView: View {
                                     .padding(.horizontal)
                                 }
                             }
-
-                            .padding(.horizontal) // Adds space on the sides to match your cards
+                            
+                            .padding(.horizontal)
                             
                             calendarView
-                    
+                            
                         }
                         .padding(.top)
                         
@@ -89,8 +89,8 @@ struct HomeView: View {
                         ToolbarItem(placement: .principal) {
                             Text("SaveSync")
                                 .font(.headline)
-                                
-                               
+                            
+                            
                         }
                     }
                 }
@@ -105,10 +105,10 @@ struct HomeView: View {
                         .onTapGesture {
                             withAnimation { showingGoalFlow = false }
                         }
-
-                   
+                    
+                    
                     GoalView(isPresented: $showingGoalFlow)
-                        .frame(width: 340, height: 450)
+                        .frame(width: 340, height: 550)
                         .background(Color.white)
                         .cornerRadius(25)
                         .shadow(radius: 20)
@@ -122,17 +122,26 @@ struct HomeView: View {
                         .onTapGesture { withAnimation { showingDayDetail = false } }
                     
                     
-                    DayDetailPopup(
-                        date: date,
-                        expenses: viewModel.expensesFor(day: date),
-                        isPresented: $showingDayDetail
-                    )
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 100)
-                    .transition(.scale)
-                    
-                    
+                    if showingDayDetail, let dateToDisplay = selectedDate {
+                        CalendarPopUp(
+                            date: dateToDisplay,
+                            expenses: viewModel.expensesFor(day: dateToDisplay),
+                            isPresented: $showingDayDetail,
+                            onDelete: { indices in
+                                let dayExpenses = viewModel.expensesFor(day: dateToDisplay)
+                                indices.forEach { index in
+                                    viewModel.deleteExpense(dayExpenses[index])
+                                }
+                            }
+                        )
+                        .id(dateToDisplay)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 100)
+                        .transition(.scale)
+                        
+                    }
                 }
+                
             }
             .ignoresSafeArea()
             .onAppear {
@@ -143,145 +152,141 @@ struct HomeView: View {
                     loadGoal()
                 }
             }
-            
         }
-        .ignoresSafeArea()
+            
+    }
         
+        func loadGoal() {
+            if let data = UserDefaults.standard.data(forKey: "SavedGoals"),
+               let decoded = try? JSONDecoder().decode([GoalData].self, from: data) {
+                
+                self.savedGoal = decoded.last
+            }
+        }
         
-    }
-    
-    func loadGoal() {
-        if let data = UserDefaults.standard.data(forKey: "SavedGoals"),
-           let decoded = try? JSONDecoder().decode([GoalData].self, from: data) {
-            
-            self.savedGoal = decoded.last
+        private func expenseCard(title: String, amount: Double) -> some View {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.black)
+                
+                Text("$\(amount, specifier: "%.2f")")
+                    .font(.system(size: 24, weight: .bold))
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.white)
+            .cornerRadius(10)
         }
-    }
-    
-    private func expenseCard(title: String, amount: Double) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.black)
-            
-            Text("$\(amount, specifier: "%.2f")")
-                .font(.system(size: 24, weight: .bold))
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
-        .cornerRadius(10)
-    }
-    
-    private var calendarView: some View {
-        VStack(spacing: 15) {
-            
-            HStack {
+        
+        private var calendarView: some View {
+            VStack(spacing: 15) {
                 
-                Text(displayDate.formatted(.dateTime.month(.wide).year()))
-                    .font(.system(size: 18, weight: .bold))
+                HStack {
+                    
+                    Text(displayDate.formatted(.dateTime.month(.wide).year()))
+                        .font(.system(size: 18, weight: .bold))
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 20) {
+                        // back button
+                        Button(action: { moveMonth(by: -1) }) {
+                            Image(systemName: "chevron.left")
+                        }
+                        
+                        // forward button
+                        Button(action: { moveMonth(by: 1) }) {
+                            Image(systemName: "chevron.right")
+                        }
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                }
+                .padding(.horizontal, 5)
                 
-                Spacer()
                 
-                HStack(spacing: 20) {
-                    // back button
-                    Button(action: { moveMonth(by: -1) }) {
-                        Image(systemName: "chevron.left")
+                let daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+                HStack {
+                    ForEach(daysOfWeek, id: \.self) { day in
+                        Text(day)
+                            .font(.system(size: 14))
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                
+                let columns = Array(repeating: GridItem(.flexible()), count: 7)
+                
+                
+                let days: [Date] = displayDate.getAllDays()
+                
+                LazyVGrid(columns: columns, spacing: 10) {
+                    let startOffset = Calendar.current.component(.weekday, from: days.first!) - 1
+                    
+                    ForEach(0..<startOffset, id: \.self) { _ in
+                        Text("").frame(width: 35, height: 35)
                     }
                     
-                    // forward button
-                    Button(action: { moveMonth(by: 1) }) {
-                        Image(systemName: "chevron.right")
-                    }
-                }
-                .font(.system(size: 14, weight: .semibold))
-            }
-            .padding(.horizontal, 5)
-
-            
-            let daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-            HStack {
-                ForEach(daysOfWeek, id: \.self) { day in
-                    Text(day)
-                        .font(.system(size: 14))
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            
-            let columns = Array(repeating: GridItem(.flexible()), count: 7)
-
-            
-            let days: [Date] = displayDate.getAllDays()
-
-            LazyVGrid(columns: columns, spacing: 10) {
-                let startOffset = Calendar.current.component(.weekday, from: days.first!) - 1
-                
-                ForEach(0..<startOffset, id: \.self) { _ in
-                    Text("").frame(width: 35, height: 35)
-                }
-
-                ForEach(days, id: \.self) { date in
-                    let dayNumber = Calendar.current.component(.day, from: date)
-                    
-                    // budget colour logic
-                    let dailyLimit = viewModel.monthlyBudget / 30
-                    let dayTotal = viewModel.totalFor(day: date)
-                    let percentage = dayTotal / dailyLimit
-
-                    var dayColor: Color {
+                    ForEach(days, id: \.self) { date in
+                        let dayNumber = Calendar.current.component(.day, from: date)
                         
-                        let baseColor = Color(red: 255/255, green: 173/255, blue: 123/255)
+                        // budget colour logic
+                        let dailyLimit = viewModel.monthlyBudget / 30
+                        let dayTotal = viewModel.totalFor(day: date)
+                        let percentage = dayTotal / dailyLimit
                         
-                       
-                        if dayTotal == 0 { return .clear }
-                        print("Checking Color - Percentage: \(percentage)")
-                        
-                        
-                        switch percentage {
-                        case ..<0.25:
-                            print("Level 1 (0.2)")
-                            return baseColor.opacity(0.2) // Level 1: Under 25%
+                        var dayColor: Color {
                             
-                        case ..<0.50:
-                            print("Level 2 (0.4)")
-                            return baseColor.opacity(0.4) // Level 2: 25% to 49%
-                        case ..<0.75:
-                            print("Level 3 (0.7)")
-                            return baseColor.opacity(0.7) // Level 3: 50% to 74%
-                        default:
-                            print("Level 4 (1.0)")
-                            return baseColor.opacity(1.0) // Level 4: 75% and above
+                            let baseColor = Color(red: 255/255, green: 173/255, blue: 123/255)
+                            
+                            
+                            if dayTotal == 0 { return .clear }
+                            print("Checking Color - Percentage: \(percentage)")
+                            
+                            
+                            switch percentage {
+                            case ..<0.25:
+                                print("Level 1 (0.2)")
+                                return baseColor.opacity(0.2) // Level 1: Under 25%
+                                
+                            case ..<0.50:
+                                print("Level 2 (0.4)")
+                                return baseColor.opacity(0.4) // Level 2: 25% to 49%
+                            case ..<0.75:
+                                print("Level 3 (0.7)")
+                                return baseColor.opacity(0.7) // Level 3: 50% to 74%
+                            default:
+                                print("Level 4 (1.0)")
+                                return baseColor.opacity(1.0) // Level 4: 75% and above
+                            }
                         }
+                        
+                        Text("\(dayNumber)")
+                            .font(.system(size: 16, weight: .medium))
+                            .frame(width: 35, height: 35)
+                            .background(dayColor)
+                            .foregroundColor(.black)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .onTapGesture {
+                                selectedDate = date // Set the specific date clicked
+                                withAnimation { showingDayDetail = true }
+                            }
                     }
-                    
-                    Text("\(dayNumber)")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(width: 35, height: 35)
-                        .background(dayColor)
-                        .foregroundColor(.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .onTapGesture {
-                            selectedDate = date // Set the specific date clicked
-                            withAnimation { showingDayDetail = true }
-                        }
                 }
             }
+            .padding(20)
+            .background(Color.white)
+            .cornerRadius(20)
+            .padding(.horizontal)
         }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(20)
-        .padding(.horizontal)
-    }
-
+        
+    
     private func moveMonth(by value: Int) {
         if let newDate = Calendar.current.date(byAdding: .month, value: value, to: displayDate) {
             displayDate = newDate
         }
     }
-
-    
 }
 
 extension Date {
