@@ -177,4 +177,8 @@ class ExpenseViewModel: ObservableObject {
             self.expenses = decoded
         }
     }
+    
+    func deleteExpense(_ item: ExpenseItem) {
+        expenses.removeAll { $0.id == item.id }
+    }
 }
