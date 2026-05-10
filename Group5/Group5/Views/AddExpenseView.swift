@@ -186,7 +186,7 @@ struct AddExpenseView: View {
                 .bold()
                 .foregroundStyle(.black)
                 .padding()
-                .background(saveToCategory ? Color.catogories : Color.gray)
+                .background(saveToCategory ? Color.categories : Color.gray)
                 .clipShape(RoundedRectangle(cornerRadius: 30))
         }.padding()
     }
@@ -205,7 +205,7 @@ struct CategoryButton: View{
             VStack {
                 ZStack {
                     Circle()
-                        .fill(isSelected ? Color.selectedCate : Color.catogories)
+                        .fill(isSelected ? Color.selectedCate : Color.categories)
                         .frame(width: 75, height: 75)
                     Image(systemName: category.icon)
                         .font(.system(size: 26, weight: .bold))

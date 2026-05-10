@@ -22,9 +22,19 @@ struct DayDetailPopup: View {
             
            
             ScrollView {
-                VStack(spacing: 25) {
-                    ForEach(expenses) { item in
-                        expenseRow(item)
+                if expenses.isEmpty {
+                    VStack(spacing: 10) {
+            
+                        Text("No expenses recorded for this day.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 40)
+                } else {
+                    VStack(spacing: 25) {
+                        ForEach(expenses) { item in
+                            expenseRow(item)
+                        }
                     }
                 }
             }

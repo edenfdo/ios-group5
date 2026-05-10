@@ -26,16 +26,14 @@ struct HomeView: View {
                             expenseCard(title: "Remaining", amount: viewModel.remainingMonthlyBudget)
                         }
                         .padding(.horizontal)
-                        
                         VStack {
                             if let goal = savedGoal {
+                                // DISPLAY 1: Show progress if a goal exists
                                 HStack(spacing: 20) {
-                                    
                                     VStack(alignment: .leading, spacing: 10) {
                                         Text("Your Goal Progress:")
                                             .font(.system(size: 22, weight: .bold))
                                         
-                                        // calculate how much is left
                                         let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
                                         
                                         Text("$\(remaining, specifier: "%.2f") away!")
@@ -44,16 +42,29 @@ struct HomeView: View {
                                     
                                     Spacer()
                                     
-                                   
                                     GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
-                                        .frame(width: 120, height: 120) // Slightly smaller to fit the row
+                                        .frame(width: 120, height: 120)
                                 }
                                 .padding(25)
-                                .background(Color(red: 252/255, green: 245/255, blue: 230/255)) // The cream background from your image
+                                .background(Color(red: 252/255, green: 245/255, blue: 230/255))
                                 .cornerRadius(20)
                                 .padding(.horizontal)
+                                
+                            } else {
+                                // DISPLAY 2: Show the create button if no goal exists
+                                Button(action: {
+                                    showingGoalFlow = true
+                                }) {
+                                    Text("Create a goal")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 14)
+                                        .background(Color(red: 255/255, green: 185/255, blue: 135/255))
+                                        .cornerRadius(12)
+                                }
+                                .padding(.horizontal)
                             }
-
                         }
 
                         .padding(.horizontal) // Adds space on the sides to match your cards

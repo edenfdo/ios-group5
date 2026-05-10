@@ -10,7 +10,7 @@ import SwiftUI
 struct PopUpBudgetSettingView: View
 {
     // ViewModel
-    @ObservedObject var viewModel: BudgetViewModel
+    @ObservedObject var viewModel: ExpenseViewModel
     // To set budget and limit data
     @State private var showLimitInput = false
     @State private var selectedCategory: ExpenseCategory?
@@ -66,7 +66,7 @@ struct PopUpBudgetSettingView: View
                 .foregroundColor(.black)
                 .padding(.horizontal, 40)
                 .padding(.vertical, 10)
-                .background(Color("Catogories"))
+                .background(Color("Categories"))
                 .cornerRadius(18)
         }
         .padding(.bottom, 30)
@@ -180,7 +180,7 @@ struct PopupBudgetCategoryRow: View
 
                 Image(systemName: item.category.icon)
                     .font(.system(size: 22))
-                    .foregroundColor(Color("Catogories"))
+                    .foregroundColor(Color("Categories"))
             }
             Text(item.category.rawValue)
                 .font(.subheadline)
@@ -206,5 +206,5 @@ struct PopupBudgetCategoryRow: View
 
 
 #Preview {
-    PopUpBudgetSettingView(viewModel: BudgetViewModel())
+    PopUpBudgetSettingView(viewModel: ExpenseViewModel())
 }
