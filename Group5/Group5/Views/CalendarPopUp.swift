@@ -10,26 +10,36 @@ import SwiftUI
 
 struct DayDetailPopup: View {
     let date: Date
-    let expenses: [ExpenseItem] // Using your ExpenseItem type
+    let expenses: [ExpenseItem] 
     @Binding var isPresented: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Title Date
+           
             Text(date.formatted(.dateTime.day().month().year()))
                 .font(.title2.bold())
                 .padding(.bottom, 10)
             
-            // List of Expenses
+           
             ScrollView {
-                VStack(spacing: 25) {
-                    ForEach(expenses) { item in
-                        expenseRow(item)
+                if expenses.isEmpty {
+                    VStack(spacing: 10) {
+            
+                        Text("No expenses recorded for this day.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 40)
+                } else {
+                    VStack(spacing: 25) {
+                        ForEach(expenses) { item in
+                            expenseRow(item)
+                        }
                     }
                 }
             }
             
-            // Close Button
+            
             HStack {
                 Spacer()
                 Button(action: { withAnimation { isPresented = false } }) {
@@ -61,7 +71,7 @@ struct DayDetailPopup: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.category.rawValue).bold()
-                // Using your 'note' property
+                
                 if let note = item.note, !note.isEmpty {
                     Text("Notes: \(note)")
                         .font(.caption)
@@ -71,7 +81,7 @@ struct DayDetailPopup: View {
             
             Spacer()
             
-            // Using your 'spending' property
+            
             Text("$\(item.spending, specifier: "%.2f")")
                 .bold()
         }

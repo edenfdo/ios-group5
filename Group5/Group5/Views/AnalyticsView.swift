@@ -107,7 +107,7 @@ struct AnalyticsView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color("Catogories").opacity(0.25))
+                    .fill(Color("Catogeries").opacity(0.25))
                     .frame(width: 48, height: 48)
                 
                 Image(systemName: category.icon)
