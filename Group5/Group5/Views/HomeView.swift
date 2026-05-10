@@ -17,122 +17,139 @@ struct HomeView: View {
     @State private var displayDate = Date()
     
     var body: some View {
-        ZStack{
-            NavigationStack{
-                ScrollView{
-                    VStack (spacing: 20) {
-                        HStack(spacing: 15) {
-                            expenseCard(title: "Today", amount: viewModel.todayTotal)
-                            expenseCard(title: "Remaining", amount: viewModel.remainingMonthlyBudget)
-                        }
-                        .padding(.horizontal)
-                        VStack {
-                            if let goal = savedGoal {
-                                // DISPLAY 1: Show progress if a goal exists
-                                HStack(spacing: 20) {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Text("Your Goal Progress:")
-                                            .font(.system(size: 22, weight: .bold))
-                                        
-                                        let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
-                                        
-                                        Text("$\(remaining, specifier: "%.2f") away!")
-                                            .font(.system(size: 18, weight: .semibold))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
-                                        .frame(width: 120, height: 120)
-                                }
-                                .padding(25)
-                                .background(Color(red: 252/255, green: 245/255, blue: 230/255))
-                                .cornerRadius(20)
-                                .padding(.horizontal)
-                                
-                            } else {
-                                // DISPLAY 2: Show the create button if no goal exists
-                                Button(action: {
-                                    showingGoalFlow = true
-                                }) {
-                                    Text("Create a goal")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(.black)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 14)
-                                        .background(Color(red: 255/255, green: 185/255, blue: 135/255))
-                                        .cornerRadius(12)
-                                }
-                                .padding(.horizontal)
+        ZStack {
+            Color("BackgroundColour")
+                .ignoresSafeArea()
+            ZStack {
+                VStack {
+                    Text("SaveSync")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 10)
+                
+                
+                    ScrollView{
+                        VStack (spacing: 20) {
+                            HStack(spacing: 15) {
+                                expenseCard(title: "Today", amount: viewModel.todayTotal)
+                                expenseCard(title: "Remaining", amount: viewModel.remainingMonthlyBudget)
                             }
+                            .padding(.horizontal)
+                            VStack {
+                                if let goal = savedGoal {
+                                    // DISPLAY 1: Show progress if a goal exists
+                                    HStack(spacing: 20) {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            Text("Your Goal Progress:")
+                                                .font(.system(size: 22, weight: .bold))
+                                            
+                                            let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
+                                            
+                                            Text("$\(remaining, specifier: "%.2f") away!")
+                                                .font(.system(size: 18, weight: .semibold))
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
+                                            .frame(width: 120, height: 120)
+                                    }
+                                    .padding(25)
+                                    .background(Color(red: 252/255, green: 245/255, blue: 230/255))
+                                    .cornerRadius(20)
+                                    .padding(.horizontal)
+                                    
+                                } else {
+                                    // DISPLAY 2: Show the create button if no goal exists
+                                    Button(action: {
+                                        showingGoalFlow = true
+                                    }) {
+                                        Text("Create a goal")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.black)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 14)
+                                            .background(Color(red: 255/255, green: 185/255, blue: 135/255))
+                                            .cornerRadius(12)
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+
+                            .padding(.horizontal) // Adds space on the sides to match your cards
+                            
+                            calendarView
+                    
+                        }
+                        .padding(.top)
+                        
+                    }
+                    .background(.backgroundColour)
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("SaveSync")
+                                .font(.headline)
+                                
+                               
+                        }
+                    }
+                }
+                .padding(.bottom, 90)
+                .padding(.top, 65)
+                .padding(.horizontal, 3)
+                
+                if showingGoalFlow {
+                    
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation { showingGoalFlow = false }
                         }
 
-                        .padding(.horizontal) // Adds space on the sides to match your cards
-                        
-                        calendarView
+                   
+                    GoalView(isPresented: $showingGoalFlow)
+                        .frame(width: 340, height: 450)
+                        .background(Color.white)
+                        .cornerRadius(25)
+                        .shadow(radius: 20)
+                        .transition(.scale.combined(with: .opacity))
+                }
                 
-                    }
-                    .padding(.top)
+                else if showingDayDetail, let date = selectedDate {
+                    
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture { withAnimation { showingDayDetail = false } }
+                    
+                    
+                    DayDetailPopup(
+                        date: date,
+                        expenses: viewModel.expensesFor(day: date),
+                        isPresented: $showingDayDetail
+                    )
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 100)
+                    .transition(.scale)
+                    
                     
                 }
-                .background(.backgroundColour)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text("SaveSync")
-                            .font(.headline)
-                            
-                           
-                    }
-                }
-                
             }
-            if showingGoalFlow {
-                
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation { showingGoalFlow = false }
-                    }
-
-               
-                GoalView(isPresented: $showingGoalFlow)
-                    .frame(width: 340, height: 450)
-                    .background(Color.white)
-                    .cornerRadius(25)
-                    .shadow(radius: 20)
-                    .transition(.scale.combined(with: .opacity))
-            }
-            
-            if showingDayDetail, let date = selectedDate {
-                
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                    .onTapGesture { withAnimation { showingDayDetail = false } }
-                
-                
-                DayDetailPopup(
-                    date: date,
-                    expenses: viewModel.expensesFor(day: date),
-                    isPresented: $showingDayDetail
-                )
-                .padding(.horizontal, 40)
-                .padding(.vertical, 100)
-                .transition(.scale)
-            }
-        }
-        .onAppear {
-            loadGoal()
-        }
-        .onChange(of: showingGoalFlow) { _, isShowing in
-            if !isShowing {
+            .ignoresSafeArea()
+            .onAppear {
                 loadGoal()
             }
+            .onChange(of: showingGoalFlow) { _, isShowing in
+                if !isShowing {
+                    loadGoal()
+                }
+            }
+            
         }
-        
+        .ignoresSafeArea()
         
         
     }
+    
     func loadGoal() {
         if let data = UserDefaults.standard.data(forKey: "SavedGoals"),
            let decoded = try? JSONDecoder().decode([GoalData].self, from: data) {
