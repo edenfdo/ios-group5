@@ -30,7 +30,6 @@ struct AddExpenseView: View {
     
     var body: some View {
         ZStack {
-            ScrollView {
                 VStack(spacing: 10) {
                     
                     dateSelection
@@ -44,9 +43,7 @@ struct AddExpenseView: View {
                     saveButton
                     
                 }
-                .padding(.bottom, 10)
-                .padding(.top, 60)
-            }
+                .padding(.bottom, 30)
         }
     }
     

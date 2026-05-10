@@ -30,7 +30,7 @@ struct BudgetView: View {
                 Text("Budget")
                     .font(.headline)
                     .fontWeight(.bold)
-                    .padding(.top, 50)
+                    .padding(.top, 65)
                     .padding(.bottom, 20)
                 monthlyBudgetCard
                     .padding(.horizontal, 20)
