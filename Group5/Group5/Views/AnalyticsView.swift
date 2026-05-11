@@ -190,14 +190,48 @@ struct MonthlyLineChart: View {
     
     var body: some View {
         GeometryReader { geo in
+            let labelWidth: CGFloat = 38
+            let chartHeight: CGFloat = 135
+            let chartWidth = geo.size.width - labelWidth
+            
             VStack(spacing: 8) {
-                ZStack {
-                    chartGrid
-                    chartLine(size: geo.size)
+                HStack(spacing: 0) {
+                    yAxisLabels
+                        .frame(width: labelWidth, height: chartHeight)
+                    
+                    ZStack {
+                        chartGrid
+                        chartLine(size: CGSize(width: chartWidth, height: chartHeight))
+                    }
+                    .frame(width: chartWidth, height: chartHeight)
                 }
-                .frame(height: 135)
                 
-                monthLabels
+                HStack(spacing: 0) {
+                    Spacer()
+                        .frame(width: labelWidth)
+                    
+                    monthLabels
+                        .frame(width: chartWidth)
+                }
+            }
+        }
+    }
+    
+    //money labels on y axis
+    var yAxisLabels: some View {
+        let maxValue = max(monthlyTotals.max() ?? 0, 1)
+        
+        return VStack {
+            ForEach((0..<5).reversed(), id: \.self) { index in
+                let value = maxValue * Double(index) / 4.0
+                Text(moneyLabel(value))
+                    .font(.system(size: 9))
+                    .foregroundStyle(.gray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                if index != 0 {
+                    Spacer()
+                }
             }
         }
     }
@@ -230,7 +264,7 @@ struct MonthlyLineChart: View {
     func chartLine(size: CGSize) -> some View {
         let maxValue = max(monthlyTotals.max() ?? 0, 1)
         let width = size.width
-        let height: CGFloat = 135
+        let height = size.height
         let gap = width / CGFloat(monthlyTotals.count - 1)
         
         let points = monthlyTotals.enumerated().map { index, total in
@@ -263,6 +297,15 @@ struct MonthlyLineChart: View {
             }
         }
         
+    }
+    
+    //formats big numbers as money
+    func moneyLabel(_ value: Double) -> String {
+        if value >= 1000 {
+            return "$\(Int(value / 1000))K"
+        } else {
+            return "$\(Int(value))"
+        }
     }
 }
 
