@@ -8,7 +8,7 @@
 import Foundation
 
 func saveGoalToUserDefaults(newGoal: GoalData) {
-    // 1. Get existing goals from UserDefaults
+    // gets existing goals from UserDefaults
     let defaults = UserDefaults.standard
     var currentGoals: [GoalData] = []
     
@@ -18,10 +18,10 @@ func saveGoalToUserDefaults(newGoal: GoalData) {
         }
     }
     
-    // 2. Add the new goal
+    // adds the new goal
     currentGoals.append(newGoal)
     
-    // 3. Save the updated list back to UserDefaults
+    // saves the updated list back to UserDefaults
     if let encoded = try? JSONEncoder().encode(currentGoals) {
         defaults.set(encoded, forKey: "SavedGoals")
     }

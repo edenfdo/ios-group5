@@ -7,6 +7,7 @@
 
 import Foundation
 
+// expense model
 struct ExpenseItem: Identifiable, Codable {
     let id: UUID
     var spending: Double

@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+// goal model
 struct GoalData: Codable, Identifiable {
     var id = UUID()
     var name: String = ""
