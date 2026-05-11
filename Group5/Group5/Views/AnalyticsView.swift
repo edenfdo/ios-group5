@@ -181,7 +181,13 @@ struct AnalyticsView: View {
             
             return (category: category, total: total, count: categoryExpenses.count)
         }
-        .sorted { $0.category.rawValue < $1.category.rawValue }
+        .sorted {
+            if $0.total == $1.total {
+                return $0.category.rawValue < $1.category.rawValue
+            } else {
+                return $0.total > $1.total
+            }
+        }
     }
 }
 
@@ -256,9 +262,11 @@ struct MonthlyLineChart: View {
         HStack {
             ForEach(months, id: \.self) { month in
                 Text(month)
-                    .font(.system(size: 9))
+                    .font(.system(size: 10))
                     .foregroundStyle(.gray)
                     .frame(maxWidth: .infinity)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
         }
     }
