@@ -54,7 +54,7 @@ struct AnalyticsView: View {
             // displays the total money spent this year
             Text("$  \(Int(totalSpentThisYear))")
                 .font(.system(size: 50, weight: .bold))
-                .foregroundStyle(AppColours.black)
+                .foregroundStyle(.black)
             
             Text("\(expensesThisYear.count) expenses")
                 .font(.caption)
@@ -109,11 +109,11 @@ struct AnalyticsView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color("Catogeries").opacity(0.25))
+                    .fill(Color("Categories").opacity(0.25))
                     .frame(width: 48, height: 48)
                 
                 Image(systemName: category.icon)
-                    .foregroundStyle(AppColours.orange)
+                    .foregroundStyle(Color.categories)
                     .font(.title3)
             }
             
