@@ -9,6 +9,7 @@ import SwiftUI
 
 //Analytics View page.
 struct AnalyticsView: View {
+    // gets the expense data from the view model so the page shows updated spending
     @ObservedObject var viewModel: ExpenseViewModel
     
     init(viewModel: ExpenseViewModel = ExpenseViewModel()) {
@@ -21,11 +22,12 @@ struct AnalyticsView: View {
             Color("BackgroundColour")
                 .ignoresSafeArea()
             VStack {
+                // main page heading
                 Text("Analytics")
                     .font(.headline)
                     .fontWeight(.bold)
                     .padding(.bottom, 10)
-                
+                // scroll view for the user to go through each categories
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
                         totalSpendCard
@@ -43,13 +45,13 @@ struct AnalyticsView: View {
         }
     }
     
-    //total spent card
+    //total spent card shows the total spend summary card
     var totalSpendCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Total Spent")
                 .font(.subheadline)
                 .fontWeight(.bold)
-            
+            // displays the total money spent this year
             Text("$  \(Int(totalSpentThisYear))")
                 .font(.system(size: 50, weight: .bold))
                 .foregroundStyle(AppColours.black)
@@ -68,7 +70,7 @@ struct AnalyticsView: View {
         )
     }
     
-    //line graph card
+    //line graph card for the monthly spending
     var lineChartCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("Monthly Spending")
@@ -88,7 +90,7 @@ struct AnalyticsView: View {
         )
     }
     
-    //top expenses list
+    //top expenses list shows the top spending categories list
     var topExpensesSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Top expenses")
@@ -102,7 +104,7 @@ struct AnalyticsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    //each category row
+    //this shows each expense category row
     func categoryExpenseRow(category: ExpenseCategory, total: Double, count: Int) -> some View {
         HStack(spacing: 14) {
             ZStack {
@@ -119,7 +121,7 @@ struct AnalyticsView: View {
                 Text(category.rawValue.capitalized)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                
+                // this showstotal money spent this year
                 Text("\(count) expenses")
                     .font(.caption)
                     .foregroundStyle(.gray)
@@ -145,7 +147,7 @@ struct AnalyticsView: View {
         }
     }
     
-    //total spent this year
+    //calculate the total spending this year
     var totalSpentThisYear: Double {
         expensesThisYear.reduce(0) { total, expense in
             total + expense.spending
@@ -171,7 +173,7 @@ struct AnalyticsView: View {
         return totals
     }
     
-    //category totals in alphabetical order
+    //category totals in the alphabetical order
     var categoryTotals: [(category: ExpenseCategory, total: Double, count: Int)] {
         ExpenseCategory.allCases.map { category in
             let categoryExpenses = expensesThisYear.filter { $0.category == category }
@@ -186,6 +188,7 @@ struct AnalyticsView: View {
 //Simple line graph for monthly expenses
 struct MonthlyLineChart: View {
     let monthlyTotals: [Double]
+    // months labels under the graph x axis
     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     
     var body: some View {
@@ -260,13 +263,13 @@ struct MonthlyLineChart: View {
         }
     }
     
-    //draws the actual spending line
+    //draws the spending line sing monthly expense values
     func chartLine(size: CGSize) -> some View {
         let maxValue = max(monthlyTotals.max() ?? 0, 1)
         let width = size.width
         let height = size.height
         let gap = width / CGFloat(monthlyTotals.count - 1)
-        
+        // converts expense values into points on the graph
         let points = monthlyTotals.enumerated().map { index, total in
             CGPoint(
                 x: CGFloat(index) * gap,
@@ -278,7 +281,7 @@ struct MonthlyLineChart: View {
             Path { path in
                 guard let firstPoint = points.first else { return }
                 path.move(to: firstPoint)
-                
+                // connects all points with a line
                 for point in points.dropFirst() {
                     path.addLine(to: point)
                 }
@@ -299,7 +302,7 @@ struct MonthlyLineChart: View {
         
     }
     
-    //formats big numbers as money
+    //formats big numbers as money such as K
     func moneyLabel(_ value: Double) -> String {
         if value >= 1000 {
             return "$\(Int(value / 1000))K"
