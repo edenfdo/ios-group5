@@ -34,7 +34,7 @@ struct GoalProgressCircle: View {
             }
             .clipShape(Circle())
             
-            // Solid black icon
+            
             Image(systemName: goal.icon)
                 .font(.system(size: 45, weight: .medium))
                 .foregroundColor(.black)

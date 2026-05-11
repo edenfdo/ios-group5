@@ -20,27 +20,27 @@ struct AnalyticsView: View {
         ZStack {
             Color("BackgroundColour")
                 .ignoresSafeArea()
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
-                    titleSection
-                    totalSpendCard
-                    lineChartCard
-                    topExpensesSection
+            VStack {
+                Text("Analytics")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 10)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 18) {
+                        totalSpendCard
+                        lineChartCard
+                        topExpensesSection
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 90)
+                    .safeAreaPadding(.bottom, 90)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 90)
             }
+            .padding(.bottom, 90)
+            .padding(.top, 65)
+            .padding(.horizontal, 3)
         }
-    }
-    
-    //page title
-    var titleSection: some View {
-        Text("Analytics")
-            .font(.headline)
-            .fontWeight(.bold)
-            .padding(.top, 25)
-            .padding(.bottom, 12)
     }
     
     //total spent card
@@ -107,7 +107,7 @@ struct AnalyticsView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color("Catogories").opacity(0.25))
+                    .fill(Color("Catogeries").opacity(0.25))
                     .frame(width: 48, height: 48)
                 
                 Image(systemName: category.icon)

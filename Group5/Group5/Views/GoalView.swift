@@ -32,7 +32,7 @@ struct GoalView: View {
     
     var body: some View {
         VStack(spacing: 30) {
-            // Header with Close Button
+            
             HStack {
                 Spacer()
                 
@@ -49,11 +49,11 @@ struct GoalView: View {
             .padding()
 
             if currentStep == 1 {
-                stepOne // Name slide
+                stepOne
             } else if currentStep == 2 {
-                stepTwo // Icon slide
+                stepTwo
             } else {
-                stepThree // Amount slide
+                stepThree
             }
             
             Spacer()
@@ -100,7 +100,7 @@ struct GoalView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.black)
                         
-                        // The white circle with chevron
+                        
                         ZStack {
                             Circle()
                                 .fill(.white)
@@ -112,10 +112,10 @@ struct GoalView: View {
                         }
                     }
                     .padding(.vertical, 10)
-                    .padding(.leading, 24)  // More padding on the left for the text
-                    .padding(.trailing, 8)  // Less on the right because the circle has its own padding
-                    .background(Color(red: 255/255, green: 185/255, blue: 135/255)) // The peach color
-                    .clipShape(Capsule()) // This gives it the perfectly round ends shown in your image
+                    .padding(.leading, 24)
+                    .padding(.trailing, 8)
+                    .background(Color(red: 255/255, green: 185/255, blue: 135/255))
+                    .clipShape(Capsule())
                     
                 }
                 .disabled(isButtonDisabled)
@@ -126,7 +126,7 @@ struct GoalView: View {
             
         }
         .onAppear {
-            // Focus automatically when the view opens (Slide 1)
+            
             isTextFieldFocused = true
         }
         .onChange(of: currentStep) { oldStep, newStep in
@@ -176,12 +176,12 @@ struct GoalView: View {
                 .bold()
             
             HStack(spacing: 5) {
-                // The currency symbol
+               
                 Text("$")
                     .font(.title2)
                     .foregroundColor(.gray)
-                TextField("Enter amount here", text: $amountString) // <-- Use 'text' instead of 'value'
-//                    .keyboardType(.decimalPad)
+                TextField("Enter amount here", text: $amountString)
+//                   
                     .focused($isTextFieldFocused)
                     .textFieldStyle(.plain)
                     .onChange(of: amountString) { oldValue, newValue in
@@ -194,7 +194,7 @@ struct GoalView: View {
                             amountString = filtered
                         }
                         
-                        // This updates your number for the logic/saving
+                        
                         goal.amount = Double(amountString) ?? 0.0
                     }
             }

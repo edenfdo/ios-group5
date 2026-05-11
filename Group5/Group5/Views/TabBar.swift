@@ -52,7 +52,7 @@ struct TabBar: View {
             .padding(.horizontal, 28)
             .padding(.top, 8)
             .padding(.bottom, 20)
-//                    .background(Color(.white))
+//            .background(Color(.white))
         }
     }
     

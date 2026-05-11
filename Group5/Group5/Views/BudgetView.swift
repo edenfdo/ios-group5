@@ -14,8 +14,7 @@ struct BudgetView: View {
     @State private var showBudgetSetting = false
     
     // ViewModel
-    @ObservedObject var viewModel: BudgetViewModel
-    @ObservedObject var expenseViewModel: ExpenseViewModel
+    @ObservedObject var viewModel: ExpenseViewModel
 
     var body: some View {
         // Background
@@ -30,7 +29,7 @@ struct BudgetView: View {
                 Text("Budget")
                     .font(.headline)
                     .fontWeight(.bold)
-                    .padding(.top, 50)
+                    .padding(.top, 65)
                     .padding(.bottom, 20)
                 monthlyBudgetCard
                     .padding(.horizontal, 20)
@@ -79,7 +78,7 @@ struct BudgetView: View {
     var totalSpentThisMonth: Double
     {
         let calendar = Calendar.current
-        return expenseViewModel.expenses
+        return viewModel.expenses
             .filter {
                 calendar.isDate(
                     $0.date,
@@ -94,7 +93,7 @@ struct BudgetView: View {
     func spentThisMonth(for category: ExpenseCategory) -> Double
     {
         let calendar = Calendar.current
-        return expenseViewModel.expenses
+        return viewModel.expenses
             .filter {
                 calendar.isDate(
                     $0.date,
@@ -110,7 +109,7 @@ struct BudgetView: View {
     // Most recently added category
     var latestCategory: ExpenseCategory?
     {
-        expenseViewModel.expenses.last?.category
+        viewModel.expenses.last?.category
     }
 
     // Monthly budget card UI
@@ -159,7 +158,7 @@ struct BudgetView: View {
                 .scaleEffect(x: 1, y: 2.2, anchor: .center)
         }
         .padding()
-        .background(Color("Catogories"))
+        .background(Color("Categories"))
         .cornerRadius(10)
     }
 }
@@ -188,7 +187,7 @@ struct CategoryBudgetRow: View
                         .frame(width: 46, height: 46)
                     Image(systemName: item.category.icon)
                         .font(.system(size: 22))
-                        .foregroundColor(Color("Catogories"))
+                        .foregroundColor(Color("Categories"))
                 }
                 VStack(alignment: .leading, spacing: 4)
                 {
@@ -219,6 +218,6 @@ struct CategoryBudgetRow: View
 }
 
 #Preview {
-    BudgetView(viewModel: BudgetViewModel(), expenseViewModel: ExpenseViewModel())
+    BudgetView(viewModel: ExpenseViewModel())
 }
 
