@@ -12,6 +12,7 @@ struct GoalProgressCircle: View {
     var goal: GoalData
     var currentSavings: Double
     
+    // calculates progress percentage
     var progress: CGFloat {
         let percent = currentSavings / goal.amount
         return min(max(percent, 0), 1)
@@ -19,11 +20,11 @@ struct GoalProgressCircle: View {
     
     var body: some View {
         ZStack {
-            //grey background
+            // grey background
             Circle()
                 .fill(Color(red: 210/255, green: 210/255, blue: 210/255))
             
-            //fill
+            // progress fill
             GeometryReader { geo in
                 VStack {
                     Spacer(minLength: 0)
@@ -34,7 +35,7 @@ struct GoalProgressCircle: View {
             }
             .clipShape(Circle())
             
-            
+            // icon overlay
             Image(systemName: goal.icon)
                 .font(.system(size: 45, weight: .medium))
                 .foregroundColor(.black)

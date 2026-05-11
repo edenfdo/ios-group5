@@ -10,17 +10,29 @@ import SwiftUI
 
 
 struct GoalView: View {
-    @Environment(\.dismiss) var dismiss
+    // tracks which step the user is on within the popup
     @State private var currentStep = 1
+    
+    // stores the goal being created
     @State private var goal = GoalData()
+    
+    // controls whether the goal is displayed or not
     @Binding var isPresented: Bool
+    
+    // temporary string for amount input
     @State private var amountString: String = ""
+    
+    // controls keyboard/cursor focus
     @FocusState private var isTextFieldFocused: Bool
+    
+    // allows the view to dismiss itself when used in a navigation stack
+    @Environment(\.dismiss) var dismiss
 
-    
-    
+    // creates an array of icon names from all expense categories
     let icons = ExpenseCategory.allCases.map { $0.icon }
 
+    
+    // button disabling logic
     var isButtonDisabled: Bool {
         if currentStep == 1 {
             return goal.name.trimmingCharacters(in: .whitespaces).isEmpty
@@ -34,8 +46,10 @@ struct GoalView: View {
         VStack(spacing: 30) {
             
             HStack {
+                // pushes close icon to the top right
                 Spacer()
                 
+                // close button
                 Button {
                     withAnimation { isPresented = false }
                 } label: {
@@ -48,6 +62,7 @@ struct GoalView: View {
             }
             .padding()
 
+            // switching between different steps
             if currentStep == 1 {
                 stepOne
             } else if currentStep == 2 {
@@ -58,11 +73,13 @@ struct GoalView: View {
             
             Spacer()
             HStack{
+                // back navigation button which appears on step 2 and 3
                 if currentStep > 1 {
                     Button(action: {
                         withAnimation { currentStep -= 1 }
                     }) {
                         HStack(spacing: 8) {
+                            // left icon
                             ZStack {
                                 Circle()
                                     .fill(.white)
@@ -72,7 +89,7 @@ struct GoalView: View {
                                     .font(.system(size: 12, weight: .bold))
                                     .foregroundColor(.black)
                             }
-                            
+                            // text
                             Text("Back")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.black)
@@ -86,22 +103,26 @@ struct GoalView: View {
                 }
 
                 Spacer()
-                
+                // next and done button
                 Button(action: {
                     if currentStep < 3 {
                         withAnimation { currentStep += 1 }
                     } else {
+                        // close popup
                         withAnimation { isPresented = false }
+                        // save goal
                         saveGoalToUserDefaults(newGoal: goal)
                     }
                 }) {
                     HStack(spacing: 8) {
+                        // changing the label of the button depending the step number
                         Text(currentStep == 3 ? "Done" : "Next")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.black)
                         
                         
                         ZStack {
+                            // right icon
                             Circle()
                                 .fill(.white)
                                 .frame(width: 28, height: 28)
@@ -125,10 +146,12 @@ struct GoalView: View {
             }
             
         }
+        // focus logic
         .onAppear {
             
             isTextFieldFocused = true
         }
+        // focus for steps with text fields
         .onChange(of: currentStep) { oldStep, newStep in
             if newStep == 1 || newStep == 3 {
                 isTextFieldFocused = true
@@ -139,7 +162,7 @@ struct GoalView: View {
         .padding()
     }
 
-    // SLIDE 1: Name
+    // name of the goal
     var stepOne: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("What would you like to name your goal?")
@@ -151,10 +174,11 @@ struct GoalView: View {
         }
     }
 
-    // SLIDE 2: Icons
+    // choose an icon
     var stepTwo: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Pick an icon").font(.title2).bold()
+            // 4 column grid to show icon options
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
                 ForEach(icons, id: \.self) { icon in
                     Image(systemName: icon)
@@ -162,13 +186,14 @@ struct GoalView: View {
                         .frame(width: 60, height: 60)
                         .background(goal.icon == icon ? Color.orange : Color.orange.opacity(0.2))
                         .clipShape(Circle())
+                        // updates goal icon
                         .onTapGesture { goal.icon = icon }
                 }
             }
         }
     }
 
-    // SLIDE 3: Amount
+    // enter the amount
     var stepThree: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("How much do you need to save?")
@@ -176,18 +201,21 @@ struct GoalView: View {
                 .bold()
             
             HStack(spacing: 5) {
-               
+                
                 Text("$")
                     .font(.title2)
                     .foregroundColor(.gray)
+                // text field links to amountString, so that input can be validated before being assigned to goal.amount
                 TextField("Enter amount here", text: $amountString)
-//                   
+       
+                    // focus
                     .focused($isTextFieldFocused)
                     .textFieldStyle(.plain)
                     .onChange(of: amountString) { oldValue, newValue in
-                        // This logic now correctly controls the text box
+                        // only allows numbers
                         let filtered = newValue.filter { "0123456789.".contains($0) }
                         
+                        // only one decimal point allowed
                         if filtered.filter({ $0 == "." }).count > 1 {
                             amountString = String(filtered.dropLast())
                         } else {
