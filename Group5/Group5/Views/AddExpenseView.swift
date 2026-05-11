@@ -13,7 +13,7 @@ struct AddExpenseView: View {
     
     @State private var selectedDate: Date = Date()
     @State private var expenseText: String = ""
-    @State private var selectedCategory: ExpenseCategory? = nil
+    @State private var selectedCategory: ExpenseCategory? = nil //getting icon and name from ExpenseCategory model
     @State private var noteText: String = ""
     @ObservedObject var viewModel: ExpenseViewModel
     
@@ -193,6 +193,7 @@ struct AddExpenseView: View {
 
 }
 
+//Button's view for each category
 struct CategoryButton: View{
     let category: ExpenseCategory
     let isSelected: Bool
