@@ -193,7 +193,7 @@ struct MonthlyLineChart: View {
     
     var body: some View {
         GeometryReader { geo in
-            let labelWidth: CGFloat = 38
+            let labelWidth: CGFloat = 25
             let chartHeight: CGFloat = 135
             let chartWidth = geo.size.width - labelWidth
             
