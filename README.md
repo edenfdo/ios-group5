@@ -10,15 +10,19 @@ Prior to running the app in XCode, there are some additional setup instructions 
 
 1. Navigate to [Google AI Studio - API Keys](https://aistudio.google.com/api-keys) and click "Create API key".
 
+![](README-assets/create-api-key-button.png)
+
 ![](README-assets/create-api-key.png)
 
-1. Copy the API key.
-2. Open the XCode project (`Group5/Group5.xcodeproj`) in XCode.
-3. Navigate to `Group5/Group5/Development.xcconfig` and paste your API key in place of `<YOUR_API_KEY>`.
+The default settings are fine but you can update the name if you wish.
+
+2. Copy the API key.
+3. Open the XCode project (`Group5/Group5.xcodeproj`) in XCode.
+4. Navigate to `Group5/Group5/Development.xcconfig` and paste your API key in place of `<YOUR_API_KEY>`.
 
 ![](README-assets/development-xcconfig.png)
 
-4. Build and run the app on your chosen device.
+5. Build and run the app on your chosen device.
 
 ## Features
 
