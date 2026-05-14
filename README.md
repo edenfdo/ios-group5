@@ -1,8 +1,26 @@
 # ios-group5: SaveSync
 
-daily calendar expense tracker
-
 [GitHub repo URL](https://github.com/edenfdo/ios-group5)
+
+Daily calendar expense tracker
+
+## Instructions for running locally
+
+Prior to running the app in XCode, there are some additional setup instructions required due to the use of Google Gemini for the chatbot feature.
+
+1. Navigate to [Google AI Studio - API Keys](https://aistudio.google.com/api-keys) and click "Create API key".
+
+![](README-assets/create-api-key.png)
+
+1. Copy the API key.
+2. Open the XCode project (`Group5/Group5.xcodeproj`) in XCode.
+3. Navigate to `Group5/Group5/Development.xcconfig` and paste your API key in place of `<YOUR_API_KEY>`.
+
+![](README-assets/development-xcconfig.png)
+
+4. Build and run the app on your chosen device.
+
+## Features
 
 Home Page:
 1. Should show daily expenses and monthly budget remain (budget amount should be set by user in Budget page)
