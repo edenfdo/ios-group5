@@ -10,6 +10,6 @@ import Foundation
 struct ChatMessage: Identifiable, Equatable {
     let id = UUID()
     let text: String
-    let isUser: Bool // True if user sent it, False if Gemini replied
+    let isUser: Bool
     let timestamp = Date()
 }

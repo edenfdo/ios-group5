@@ -12,15 +12,15 @@ struct AIChatView: View {
     @State private var inputMessage: String = ""
     @State private var isWaitingForAI: Bool = false
     
-    // 1. Controls dismissal of fullScreenCover
+    
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack(spacing: 0) {
-            // Screen Header title block with Close Button
+            
             HStack {
                 Button(action: {
-                    dismiss() // API command that closes the sheet popup instantly
+                    dismiss()
                 }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.down")
@@ -28,7 +28,7 @@ struct AIChatView: View {
                     }
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.purple)
+                    .foregroundColor(.chart)
                 }
                 
                 Spacer()
@@ -36,23 +36,24 @@ struct AIChatView: View {
                 Text("Financial Advisor AI")
                     .font(.headline)
                     .fontWeight(.bold)
-                    // Visual offset to keep title centred relative to the screen width
+                    
+                    
                     .padding(.trailing, 45)
                 
                 Spacer()
                 
-                Image(systemName: "sparkles")
-                    .foregroundColor(.purple)
+                Image(systemName: "brain")
+                    .foregroundColor(.chart)
             }
             .padding()
-            .background(Color.white)
+            .background(Color.backgroundColour)
 
-            // Chat bubble stream
+            
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: 12) {
                         if viewModel.chatMessages.isEmpty {
-                            Text("Ask me anything about your current expenses, spending categories, or budget health analysis calculations.")
+                            Text("Ask me anything about your current expenses, monthly budget or any saving tips")
                                 .font(.caption)
                                 .foregroundColor(.gray)
                                 .multilineTextAlignment(.center)
@@ -74,8 +75,8 @@ struct AIChatView: View {
                     }
                     .padding()
                 }
-                .onChange(of: viewModel.chatMessages) { _ in
-                    if let lastMessage = viewModel.chatMessages.last {
+                .onChange(of: viewModel.chatMessages) { oldValue, newValue in
+                    if let lastMessage = newValue.last {
                         withAnimation {
                             proxy.scrollTo(lastMessage.id, anchor: .bottom)
                         }
@@ -83,20 +84,20 @@ struct AIChatView: View {
                 }
             }
 
-            // Text Input Footer toolbar dock
+            
             HStack(spacing: 10) {
-                TextField("Ask about your budget limits...", text: $inputMessage)
+                TextField("Ask about your expenses...", text: $inputMessage)
                     .padding(12)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .disabled(isWaitingForAI)
 
                 Button(action: sendMessageAction) {
-                    Image(systemName: "paperplane.fill")
-                        .foregroundColor(inputMessage.isEmpty ? .gray : .purple)
+                    Image(systemName: "arrow.up")
+                        .foregroundColor(inputMessage.isEmpty ? .gray : .chart)
                         .font(.system(size: 18))
                         .padding(12)
-                        .background(inputMessage.isEmpty ? Color(.systemGray5) : Color.purple.opacity(0.15))
+                        .background(inputMessage.isEmpty ? Color(.systemGray5) : Color.chart.opacity(0.15))
                         .clipShape(Circle())
                 }
                 .disabled(inputMessage.isEmpty || isWaitingForAI)
@@ -115,9 +116,9 @@ struct AIChatView: View {
             Text(.init(msg.text))
                 .font(.subheadline)
                 .padding(12)
-                .background(msg.isUser ? Color.purple : Color(.systemGray5))
+                .background(msg.isUser ? Color.chart : Color(.systemGray5))
                 .foregroundColor(msg.isUser ? .white : .black)
-                // FIXED: Uses standard RoundedRectangle which supports iOS 13, 14, 15, 16, and 17+
+                
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .frame(maxWidth: 280, alignment: msg.isUser ? .trailing : .leading)
                 .id(msg.id)

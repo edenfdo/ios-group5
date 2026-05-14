@@ -10,6 +10,7 @@ import Combine
 
 class ExpenseViewModel: ObservableObject {
     
+    //list of chat messages
     @Published var chatMessages: [ChatMessage] = []
     
     // expenses
@@ -183,51 +184,78 @@ class ExpenseViewModel: ObservableObject {
 
 extension ExpenseViewModel {
 
-    // Call the Gemini Web API using a standard HTTP POST network request
+    
     func sendToGemini(userMessage: String) async {
         let currentYear = Calendar.current.component(.year, from: Date())
-        var dataContext = "Context: Local spending history for year \(currentYear):\n"
+
+        
+        var dataContext = "Local spending history for year \(currentYear):\n"
 
 
+        //loop through expenses and format
         for expense in self.expenses {
             dataContext += "- \(expense.category.rawValue.capitalized): $\(Int(expense.spending)) on \(expense.date.formatted(date: .abbreviated, time: .omitted))\n"
         }
 
+        //load api url
         let urlString = Env.apiURL
-        
-        print(urlString)
 
-
+        //validates url is correct before continuing
         guard let url = URL(string: urlString) else { return }
+        
+        //foramt today's date
+        let todayString = Date().formatted(date: .abbreviated, time: .omitted)
+        
+        //create full context prompt
+        let fullContext =
+        """
+        Today's date is \(todayString).
+        If the user says "today", interpret it as this date.
 
-        //  Correct Gemini request format
+        ### Budget Summary
+        - Total monthly budget: $\(Int(monthlyBudget))
+        - Total spent this month: $\(Int(currentMonthTotal))
+        - Remaining monthly budget: $\(Int(remainingMonthlyBudget))
+
+        ### Category Budgets
+        \(categoryLimits.map { "- \($0.category.rawValue.capitalized): $\((Int($0.limit)))" }.joined(separator: "\n"))
+
+        ### Spending History (\(currentYear))
+        \(dataContext)
+        """
+
+        
+        //create json payload
         let jsonPayload: [String: Any] = [
-                "contents": [
-                    [
-                        "role": "user",
-                        "parts": [
-                            ["text": "\(dataContext)\n\nUser Question: \(userMessage)"]
-                        ]
+            "contents": [
+                [
+                    "role": "user",
+                    "parts": [
+                        ["text": "\(fullContext)\nUser Question: \(userMessage)"]
                     ]
                 ]
             ]
+        ]
 
+        //convert to json
         guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonPayload) else { return }
 
+        //build url request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
 
         do {
+            //sends request
             let (data, _) = try await URLSession.shared.data(for: request)
 
-            // 🔍 Print raw response for debugging
+            
             if let raw = String(data: data, encoding: .utf8) {
                 print("RAW RESPONSE:", raw)
             }
 
-            // Parse Gemini response
+            //extracting ai message
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let candidates = json["candidates"] as? [[String: Any]],
                let firstCandidate = candidates.first,
@@ -236,6 +264,7 @@ extension ExpenseViewModel {
                let firstPart = parts.first,
                let responseText = firstPart["text"] as? String {
 
+                //connects message to ui
                 await MainActor.run {
                     self.chatMessages.append(
                         ChatMessage(text: responseText.trimmingCharacters(in: .whitespacesAndNewlines), isUser: false)
@@ -243,7 +272,7 @@ extension ExpenseViewModel {
                 }
             }
 
-            //  Handle API errors
+            
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {
@@ -252,7 +281,7 @@ extension ExpenseViewModel {
                     self.chatMessages.append(ChatMessage(text: "API Error: \(message)", isUser: false))
                 }
             }
-
+        //catch network errors
         } catch {
             await MainActor.run {
                 self.chatMessages.append(ChatMessage(text: "Network error.", isUser: false))

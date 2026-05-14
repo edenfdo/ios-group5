@@ -47,19 +47,21 @@ struct HomeView: View {
                     ScrollView{
                         VStack (spacing: 20) {
                             
+                            //ai button
                             Button(action: {
                                 showingAIChat = true
                             }) {
                                 HStack(spacing: 12) {
                                     ZStack {
+                                        //icon
                                         Circle()
-                                            .fill(Color.purple.opacity(0.15))
+                                            .fill(Color.chart.opacity(0.15))
                                             .frame(width: 36, height: 36)
-                                        Image(systemName: "sparkles")
+                                        Image(systemName: "brain")
                                             .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(.purple)
+                                            .foregroundColor(.chart)
                                     }
-                                    
+                                    //text
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("AI Financial Advisor")
                                             .font(.system(size: 14, weight: .bold))
@@ -70,7 +72,7 @@ struct HomeView: View {
                                     }
                                     
                                     Spacer()
-                                    
+                                    //icon
                                     Image(systemName: "chevron.right")
                                         .font(.caption)
                                         .foregroundColor(.gray)
