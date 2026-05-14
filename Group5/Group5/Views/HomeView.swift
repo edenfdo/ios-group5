@@ -27,6 +27,9 @@ struct HomeView: View {
     // stores the currently shown month for the calendar
     @State private var displayDate = Date()
     
+    //tracks whether the AI chat popup is open
+    @State private var showingAIChat = false
+    
     var body: some View {
         ZStack {
             // background colour fill
@@ -43,6 +46,45 @@ struct HomeView: View {
                     
                     ScrollView{
                         VStack (spacing: 20) {
+                            
+                            Button(action: {
+                                showingAIChat = true
+                            }) {
+                                HStack(spacing: 12) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.purple.opacity(0.15))
+                                            .frame(width: 36, height: 36)
+                                        Image(systemName: "sparkles")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.purple)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("AI Financial Advisor")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(.black)
+                                        Text("Ask about your budget trends")
+                                            .font(.system(size: 11))
+                                            .foregroundColor(.gray)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color.white)
+                                .cornerRadius(16)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                                )
+                            }
+                            .padding(.horizontal)
                             // two cards side by side
                             HStack(spacing: 15) {
                                 // today card
@@ -170,6 +212,9 @@ struct HomeView: View {
                     loadGoal()
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showingAIChat) {
+            AIChatView(viewModel: viewModel)
         }
     }
     
@@ -310,6 +355,8 @@ struct HomeView: View {
         .padding(.horizontal)
     }
         
+    
+    
     // month navigation
     private func moveMonth(by value: Int) {
         if let newDate = Calendar.current.date(byAdding: .month, value: value, to: displayDate) {
@@ -317,6 +364,7 @@ struct HomeView: View {
         }
     }
 }
+
 
 // generates all days in a specific month
 extension Date {

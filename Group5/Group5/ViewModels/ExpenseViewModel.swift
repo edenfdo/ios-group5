@@ -9,6 +9,9 @@ import Foundation
 import Combine
 
 class ExpenseViewModel: ObservableObject {
+    
+    @Published var chatMessages: [ChatMessage] = []
+    
     // expenses
     @Published var expenses: [ExpenseItem] = [] {
         didSet {
@@ -175,4 +178,86 @@ class ExpenseViewModel: ObservableObject {
             self.expenses = decoded
         }
     }
+
+}
+
+extension ExpenseViewModel {
+
+    // Call the Gemini Web API using a standard HTTP POST network request
+    func sendToGemini(userMessage: String) async {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        var dataContext = "Context: Local spending history for year \(currentYear):\n"
+
+
+        for expense in self.expenses {
+            dataContext += "- \(expense.category.rawValue.capitalized): $\(Int(expense.spending)) on \(expense.date.formatted(date: .abbreviated, time: .omitted))\n"
+        }
+
+        let urlString = Env.apiURL
+        
+        print(urlString)
+
+
+        guard let url = URL(string: urlString) else { return }
+
+        //  Correct Gemini request format
+        let jsonPayload: [String: Any] = [
+                "contents": [
+                    [
+                        "role": "user",
+                        "parts": [
+                            ["text": "\(dataContext)\n\nUser Question: \(userMessage)"]
+                        ]
+                    ]
+                ]
+            ]
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonPayload) else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+
+            // 🔍 Print raw response for debugging
+            if let raw = String(data: data, encoding: .utf8) {
+                print("RAW RESPONSE:", raw)
+            }
+
+            // Parse Gemini response
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let candidates = json["candidates"] as? [[String: Any]],
+               let firstCandidate = candidates.first,
+               let content = firstCandidate["content"] as? [String: Any],
+               let parts = content["parts"] as? [[String: Any]],
+               let firstPart = parts.first,
+               let responseText = firstPart["text"] as? String {
+
+                await MainActor.run {
+                    self.chatMessages.append(
+                        ChatMessage(text: responseText.trimmingCharacters(in: .whitespacesAndNewlines), isUser: false)
+                    )
+                }
+            }
+
+            //  Handle API errors
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = json["error"] as? [String: Any],
+               let message = error["message"] as? String {
+
+                await MainActor.run {
+                    self.chatMessages.append(ChatMessage(text: "API Error: \(message)", isUser: false))
+                }
+            }
+
+        } catch {
+            await MainActor.run {
+                self.chatMessages.append(ChatMessage(text: "Network error.", isUser: false))
+            }
+        }
+    }
+
 }

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Charts
+
 
 //Analytics View page.
 struct AnalyticsView: View {
@@ -191,126 +193,70 @@ struct AnalyticsView: View {
     }
 }
 
-//Simple line graph for monthly expenses
 struct MonthlyLineChart: View {
     let monthlyTotals: [Double]
-    // months labels under the graph x axis
     let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     
+    // Updated data model mapping an index property for strict timeline sorting
+    var chartData: [(index: Int, month: String, total: Double)] {
+        monthlyTotals.enumerated().map { index, total in
+            (index: index, month: months[index], total: total)
+        }
+    }
+    
     var body: some View {
-        GeometryReader { geo in
-            let labelWidth: CGFloat = 25
-            let chartHeight: CGFloat = 135
-            let chartWidth = geo.size.width - labelWidth
-            
-            VStack(spacing: 8) {
-                HStack(spacing: 0) {
-                    yAxisLabels
-                        .frame(width: labelWidth, height: chartHeight)
-                    
-                    ZStack {
-                        chartGrid
-                        chartLine(size: CGSize(width: chartWidth, height: chartHeight))
+        Chart {
+            ForEach(chartData, id: \.month) { item in
+                // 1. Plots line across custom sorted X axis coordinates
+                LineMark(
+                    x: .value("Month", item.month),
+                    y: .value("Spending", item.total)
+                )
+                .interpolationMethod(.linear)
+                .foregroundStyle(Color("Chart"))
+                .lineStyle(StrokeStyle(lineWidth: 1.5))
+                
+                // 2. Overlays data tracking circles matching your canvas design
+                PointMark(
+                    x: .value("Month", item.month),
+                    y: .value("Spending", item.total)
+                )
+                .foregroundStyle(.white)
+                .annotation(position: .overlay) {
+                    Circle()
+                        .stroke(Color("Chart"), lineWidth: 1)
+                        .frame(width: 6, height: 6)
+                }
+            }
+        }
+        // Force the layout engine to sort elements chronologically by their index order
+        .chartXScale(domain: months)
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisGridLine()
+                    .foregroundStyle(Color.gray.opacity(0.15))
+                AxisValueLabel {
+                    if let doubleValue = value.as(Double.self) {
+                        Text(moneyLabel(doubleValue))
+                            .font(.system(size: 9))
+                            .foregroundStyle(.gray)
                     }
-                    .frame(width: chartWidth, height: chartHeight)
-                }
-                
-                HStack(spacing: 0) {
-                    Spacer()
-                        .frame(width: labelWidth)
-                    
-                    monthLabels
-                        .frame(width: chartWidth)
                 }
             }
         }
-    }
-    
-    //money labels on y axis
-    var yAxisLabels: some View {
-        let maxValue = max(monthlyTotals.max() ?? 0, 1)
-        
-        return VStack {
-            ForEach((0..<5).reversed(), id: \.self) { index in
-                let value = maxValue * Double(index) / 4.0
-                Text(moneyLabel(value))
-                    .font(.system(size: 9))
-                    .foregroundStyle(.gray)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                if index != 0 {
-                    Spacer()
+        .chartXAxis {
+            AxisMarks { value in
+                AxisValueLabel {
+                    if let monthString = value.as(String.self) {
+                        Text(monthString)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.gray)
+                    }
                 }
             }
         }
     }
     
-    //light chart lines in background
-    var chartGrid: some View {
-        VStack {
-            ForEach(0..<5, id: \.self) { _ in
-                Rectangle()
-                    .fill(Color.gray.opacity(0.15))
-                    .frame(height: 1)
-                Spacer()
-            }
-        }
-    }
-    
-    //month names under graph
-    var monthLabels: some View {
-        HStack {
-            ForEach(months, id: \.self) { month in
-                Text(month)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.gray)
-                    .frame(maxWidth: .infinity)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-            }
-        }
-    }
-    
-    //draws the spending line sing monthly expense values
-    func chartLine(size: CGSize) -> some View {
-        let maxValue = max(monthlyTotals.max() ?? 0, 1)
-        let width = size.width
-        let height = size.height
-        let gap = width / CGFloat(monthlyTotals.count - 1)
-        // converts expense values into points on the graph
-        let points = monthlyTotals.enumerated().map { index, total in
-            CGPoint(
-                x: CGFloat(index) * gap,
-                y: height - CGFloat(total / maxValue) * height
-            )
-        }
-        
-        return ZStack {
-            Path { path in
-                guard let firstPoint = points.first else { return }
-                path.move(to: firstPoint)
-                // connects all points with a line
-                for point in points.dropFirst() {
-                    path.addLine(to: point)
-                }
-            }
-            .stroke(Color("Chart"), lineWidth: 1.5)
-            
-            ForEach(points.indices, id: \.self) { index in
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 6, height: 6)
-                    .overlay(
-                        Circle()
-                            .stroke(Color("Chart"), lineWidth: 1)
-                    )
-                    .position(points[index])
-            }
-        }
-        
-    }
-    
-    //formats big numbers as money such as K
     func moneyLabel(_ value: Double) -> String {
         if value >= 1000 {
             return "$\(Int(value / 1000))K"
@@ -319,6 +265,138 @@ struct MonthlyLineChart: View {
         }
     }
 }
+
+
+
+
+////Simple line graph for monthly expenses
+//struct MonthlyLineChart: View {
+//    let monthlyTotals: [Double]
+//    // months labels under the graph x axis
+//    let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+//    
+//    var body: some View {
+//        GeometryReader { geo in
+//            let labelWidth: CGFloat = 25
+//            let chartHeight: CGFloat = 135
+//            let chartWidth = geo.size.width - labelWidth
+//            
+//            VStack(spacing: 8) {
+//                HStack(spacing: 0) {
+//                    yAxisLabels
+//                        .frame(width: labelWidth, height: chartHeight)
+//                    
+//                    ZStack {
+//                        chartGrid
+//                        chartLine(size: CGSize(width: chartWidth, height: chartHeight))
+//                    }
+//                    .frame(width: chartWidth, height: chartHeight)
+//                }
+//                
+//                HStack(spacing: 0) {
+//                    Spacer()
+//                        .frame(width: labelWidth)
+//                    
+//                    monthLabels
+//                        .frame(width: chartWidth)
+//                }
+//            }
+//        }
+//    }
+//    
+//    //money labels on y axis
+//    var yAxisLabels: some View {
+//        let maxValue = max(monthlyTotals.max() ?? 0, 1)
+//        
+//        return VStack {
+//            ForEach((0..<5).reversed(), id: \.self) { index in
+//                let value = maxValue * Double(index) / 4.0
+//                Text(moneyLabel(value))
+//                    .font(.system(size: 9))
+//                    .foregroundStyle(.gray)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                
+//                if index != 0 {
+//                    Spacer()
+//                }
+//            }
+//        }
+//    }
+//    
+//    //light chart lines in background
+//    var chartGrid: some View {
+//        VStack {
+//            ForEach(0..<5, id: \.self) { _ in
+//                Rectangle()
+//                    .fill(Color.gray.opacity(0.15))
+//                    .frame(height: 1)
+//                Spacer()
+//            }
+//        }
+//    }
+//    
+//    //month names under graph
+//    var monthLabels: some View {
+//        HStack {
+//            ForEach(months, id: \.self) { month in
+//                Text(month)
+//                    .font(.system(size: 10))
+//                    .foregroundStyle(.gray)
+//                    .frame(maxWidth: .infinity)
+//                    .lineLimit(1)
+//                    .minimumScaleFactor(0.6)
+//            }
+//        }
+//    }
+//    
+//    //draws the spending line sing monthly expense values
+//    func chartLine(size: CGSize) -> some View {
+//        let maxValue = max(monthlyTotals.max() ?? 0, 1)
+//        let width = size.width
+//        let height = size.height
+//        let gap = width / CGFloat(monthlyTotals.count - 1)
+//        // converts expense values into points on the graph
+//        let points = monthlyTotals.enumerated().map { index, total in
+//            CGPoint(
+//                x: CGFloat(index) * gap,
+//                y: height - CGFloat(total / maxValue) * height
+//            )
+//        }
+//        
+//        return ZStack {
+//            Path { path in
+//                guard let firstPoint = points.first else { return }
+//                path.move(to: firstPoint)
+//                // connects all points with a line
+//                for point in points.dropFirst() {
+//                    path.addLine(to: point)
+//                }
+//            }
+//            .stroke(Color("Chart"), lineWidth: 1.5)
+//            
+//            ForEach(points.indices, id: \.self) { index in
+//                Circle()
+//                    .fill(Color.white)
+//                    .frame(width: 6, height: 6)
+//                    .overlay(
+//                        Circle()
+//                            .stroke(Color("Chart"), lineWidth: 1)
+//                    )
+//                    .position(points[index])
+//            }
+//        }
+//        
+//    }
+//    
+//    //formats big numbers as money such as K
+//    func moneyLabel(_ value: Double) -> String {
+//        if value >= 1000 {
+//            return "$\(Int(value / 1000))K"
+//        } else {
+//            return "$\(Int(value))"
+//        }
+//    }
+//}
 
 #Preview {
     AnalyticsView()
