@@ -1,0 +1,11 @@
+//
+//  Development.xcconfig
+//  Group5
+//
+//  Created by Eden Fernando on 14/5/2026.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+API_URL = https:/$()/generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=<YOUR_API_KEY>
