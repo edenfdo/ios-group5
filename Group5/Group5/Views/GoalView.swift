@@ -14,10 +14,13 @@ struct GoalView: View {
     @State private var currentStep = 1
     
     // stores the goal being created
-    @State private var goal = GoalData()
+    @State private var goal: GoalData
     
     // controls whether the goal is displayed or not
     @Binding var isPresented: Bool
+    
+    //optional parameter passed when editing an existing goal
+    private var editingGoal: GoalData?
     
     // temporary string for amount input
     @State private var amountString: String = ""
@@ -31,6 +34,18 @@ struct GoalView: View {
     // creates an array of icon names from all expense categories
     let icons = ExpenseCategory.allCases.map { $0.icon }
 
+    //initializer to handle both creation and editing modes
+    init(isPresented: Binding<Bool>, editingGoal: GoalData? = nil) {
+        self._isPresented = isPresented
+        self.editingGoal = editingGoal
+        
+        if let existingGoal = editingGoal {
+            _goal = State(initialValue: existingGoal)
+            _amountString = State(initialValue: existingGoal.amount > 0 ? String(format: "%.2f", existingGoal.amount) : "")
+        } else {
+            _goal = State(initialValue: GoalData())
+        }
+    }
     
     // button disabling logic
     var isButtonDisabled: Bool {
@@ -110,8 +125,12 @@ struct GoalView: View {
                     } else {
                         // close popup
                         withAnimation { isPresented = false }
-                        // save goal
-                        saveGoalToUserDefaults(newGoal: goal)
+                        //based on whether you are editing or saving fresh
+                        if editingGoal != nil {
+                            updateGoalInUserDefaults(updatedGoal: goal)
+                        } else {
+                            saveGoalToUserDefaults(newGoal: goal)
+                        }
                     }
                 }) {
                     HStack(spacing: 8) {
