@@ -10,8 +10,7 @@ import Combine
 
 class ExpenseViewModel: ObservableObject {
     
-    //list of chat messages
-    @Published var chatMessages: [ChatMessage] = []
+    
     
     // expenses
     @Published var expenses: [ExpenseItem] = [] {
@@ -43,6 +42,12 @@ class ExpenseViewModel: ObservableObject {
     
     // total amount spent
     @Published var monthlySpent: Double = 0
+    
+    //list of chat messages
+    @Published var chatMessages: [ChatMessage] = []
+    
+    //goals
+    @Published var goals: [GoalData] = []
     
     // calculate total for the current month
     var currentMonthTotal: Double {
@@ -82,6 +87,7 @@ class ExpenseViewModel: ObservableObject {
     {
         loadBudgetData()
         loadFromUserDefaults()
+        loadGoals()
     }
     
     // set the total monthly budget amount
@@ -128,6 +134,15 @@ class ExpenseViewModel: ObservableObject {
     // delete an expense
     func deleteExpense(_ item: ExpenseItem) {
         expenses.removeAll { $0.id == item.id }
+    }
+    
+    //loads goals from UserDefaults
+    func loadGoals() {
+        let defaults = UserDefaults.standard
+        if let data = defaults.data(forKey: "SavedGoals"),
+           let decoded = try? JSONDecoder().decode([GoalData].self, from: data) {
+            self.goals = decoded
+        }
     }
     
     // save monthly budget to UserDefaults
@@ -206,6 +221,12 @@ extension ExpenseViewModel {
         //foramt today's date
         let todayString = Date().formatted(date: .abbreviated, time: .omitted)
         
+        //goals
+        let goalsText = goals.isEmpty
+            ? "No goals have been set yet."
+            : goals.map { "- \($0.name): Target $\(Int($0.amount))" }.joined(separator: "\n")
+
+        
         //create full context prompt
         let fullContext =
         """
@@ -222,6 +243,11 @@ extension ExpenseViewModel {
 
         ### Spending History (\(currentYear))
         \(dataContext)
+        
+        ### Goals
+        \(goalsText)
+        
+        Remaining monthly budget is how much I have saved towards my goals.
         """
 
         
