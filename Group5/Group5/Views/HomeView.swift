@@ -18,6 +18,9 @@ struct HomeView: View {
     // stores the goal as an optional
     @State private var savedGoal: GoalData? = nil
     
+    //stores when the edit button is pressed
+    @State private var editingGoal: GoalData? = nil
+    
     // stores which date was selected by the user
     @State private var selectedDate: Date? = nil
     
@@ -99,28 +102,43 @@ struct HomeView: View {
                                 // display goal if exists
                                 if let goal = savedGoal {
                                     
-                                    HStack(spacing: 20) {
-                                        VStack(alignment: .leading, spacing: 10) {
-                                            Text("Your Goal Progress:")
-                                                .font(.system(size: 22, weight: .bold))
+                                    ZStack(alignment: .topTrailing) {
+                                        
+                                        HStack(spacing: 20) {
+                                            VStack(alignment: .leading, spacing: 10) {
+                                                Text("Your Goal Progress:")
+                                                    .font(.system(size: 22, weight: .bold))
+                                                
+                                                // calculates how much more needs to be saved to achieve the goal
+                                                let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
+                                                
+                                                // displays the remaining amount
+                                                Text("$\(remaining, specifier: "%.2f") away!")
+                                                    .font(.system(size: 18, weight: .semibold))
+                                            }
                                             
-                                            // calculates how much more needs to be saved to achieve the goal
-                                            let remaining = max(goal.amount - viewModel.remainingMonthlyBudget, 0)
+                                            Spacer()
                                             
-                                            // displays the remaining amount
-                                            Text("$\(remaining, specifier: "%.2f") away!")
-                                                .font(.system(size: 18, weight: .semibold))
+                                            // goal progress circle
+                                            GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
+                                                .frame(width: 120, height: 120)
                                         }
-                                        
-                                        Spacer()
-                                        
-                                        // goal progress circle
-                                        GoalProgressCircle(goal: goal, currentSavings: viewModel.remainingMonthlyBudget)
-                                            .frame(width: 120, height: 120)
+                                        .padding(25)
+                                        .background(Color(red: 252/255, green: 245/255, blue: 230/255))
+                                        .cornerRadius(20)
+                                        Button(action: {
+                                            editingGoal = goal
+                                            showingGoalFlow = true
+                                        }) {
+                                            Image(systemName: "pencil.circle.fill")
+                                                .font(.system(size: 26))
+                                                .foregroundColor(.categories)
+                                                .background(Color.white.clipShape(Circle()))
+                                                .padding(12)
+                                        }
+                                        .padding(.top, 16)
+                                        .padding(.trailing, 16)
                                     }
-                                    .padding(25)
-                                    .background(Color(red: 252/255, green: 245/255, blue: 230/255))
-                                    .cornerRadius(20)
                                     .padding(.horizontal)
                                     
                                 } else {
@@ -167,7 +185,7 @@ struct HomeView: View {
                         }
                     
                     // displays goal view
-                    GoalView(isPresented: $showingGoalFlow)
+                    GoalView(isPresented: $showingGoalFlow, editingGoal: editingGoal)
                         .frame(width: 340, height: 550)
                         .background(Color.white)
                         .cornerRadius(25)
@@ -212,6 +230,7 @@ struct HomeView: View {
             .onChange(of: showingGoalFlow) { _, isShowing in
                 if !isShowing {
                     loadGoal()
+                    editingGoal = nil
                 }
             }
         }
